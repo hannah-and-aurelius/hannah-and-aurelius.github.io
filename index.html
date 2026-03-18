@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="4.56">
+    <meta name="version" content="4.73">
     <title>Hannah & Aurelius Wedding</title>
     
     <!-- Load Tailwind CSS -->
@@ -37,29 +37,27 @@
         }
         .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
 
-        /* Falling Animation for Blossoms */
+        /* Updated Falling Animation - Starting from absolute zero to avoid hanging slivers */
         @keyframes fall {
             0% {
-                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                transform: translateY(0) translateX(0) rotate(0deg);
                 opacity: 0;
             }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
             100% {
-                transform: translateY(110vh) translateX(100px) rotate(360deg);
+                transform: translateY(115vh) translateX(120px) rotate(450deg);
                 opacity: 0;
             }
         }
 
         .falling-blossom {
-            position: absolute;
-            top: -10%;
+            position: fixed;
+            /* Move anchor well above the top to ensure no "hanging" slivers are visible */
+            top: -120px; 
             pointer-events: none;
-            animation: fall linear infinite;
+            will-change: transform, opacity;
+            z-index: 80;
         }
 
         body::-webkit-scrollbar { display: none; }
@@ -161,22 +159,23 @@
             </svg>
         );
 
-        /**
-         * New Falling Blossoms Component
-         * Creates a persistent overlay of falling petals/flowers
-         */
         const FallingBlossoms = () => {
             const blossoms = useMemo(() => {
-                return Array.from({ length: 22 }).map((_, i) => ({
-                    id: i,
-                    left: `${Math.random() * 100}%`,
-                    delay: `${Math.random() * 15}s`,
-                    duration: `${10 + Math.random() * 15}s`,
-                    size: 10 + Math.random() * 15,
-                    opacity: 0.2 + Math.random() * 0.5,
-                    isFlower: Math.random() > 0.7,
-                    sway: Math.random() * 100 - 50
-                }));
+                return Array.from({ length: 25 }).map((_, i) => {
+                    const duration = 7 + Math.random() * 8;
+                    // First set of petals starts immediately, others with random staggered delay
+                    const delay = i < 6 ? 0 : Math.random() * 12; 
+                    
+                    return {
+                        id: i,
+                        left: `${Math.random() * 100}%`,
+                        delay: `${delay}s`,
+                        duration: `${duration}s`,
+                        size: 10 + Math.random() * 14,
+                        opacity: 0.3 + Math.random() * 0.4,
+                        isFlower: Math.random() > 0.75
+                    };
+                });
             }, []);
 
             return (
@@ -187,19 +186,20 @@
                             className="falling-blossom"
                             style={{
                                 left: b.left,
+                                animation: `fall ${b.duration} linear infinite`,
                                 animationDelay: b.delay,
-                                animationDuration: b.duration,
-                                opacity: b.opacity,
                                 width: `${b.size}px`,
                                 height: `${b.size}px`,
                                 color: '#e6baba'
                             }}
                         >
-                            {b.isFlower ? (
-                                <CherryBlossomSVG className="w-full h-full" />
-                            ) : (
-                                <SinglePetalSVG className="w-full h-full" />
-                            )}
+                            <div style={{ opacity: b.opacity }} className="w-full h-full">
+                                {b.isFlower ? (
+                                    <CherryBlossomSVG className="w-full h-full" />
+                                ) : (
+                                    <SinglePetalSVG className="w-full h-full" />
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -227,309 +227,190 @@
             );
         };
 
-        const MusicPlayer = () => {
-            const [isPlaying, setIsPlaying] = useState(false);
-            const audioRef = useRef(null);
-            const musicUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-
-            useEffect(() => {
-                const audio = audioRef.current;
-                if (!audio) return;
-
-                const handleFirstInteraction = () => {
-                    if (!isPlaying) {
-                        audio.play().then(() => {
-                            setIsPlaying(true);
-                        }).catch(err => console.log("Autoplay prevented:", err));
-                    }
-                    window.removeEventListener('click', handleFirstInteraction);
-                    window.removeEventListener('touchstart', handleFirstInteraction);
-                };
-
-                window.addEventListener('click', handleFirstInteraction);
-                window.addEventListener('touchstart', handleFirstInteraction);
-
-                return () => {
-                    window.removeEventListener('click', handleFirstInteraction);
-                    window.removeEventListener('touchstart', handleFirstInteraction);
-                };
-            }, []);
-
-            const toggleMusic = () => {
-                if (isPlaying) {
-                    audioRef.current.pause();
-                } else {
-                    audioRef.current.play();
-                }
-                setIsPlaying(!isPlaying);
-            };
-
-            return (
-                <>
-                    <audio ref={audioRef} src={musicUrl} loop />
-                    <button 
-                        onClick={toggleMusic}
-                        className={`fixed bottom-6 left-6 z-[150] w-9 h-9 flex items-center justify-center rounded-full bg-white/40 border border-[#d9c5c7]/30 shadow-sm backdrop-blur-[2px] transition-all duration-500 hover:scale-110 hover:bg-white/90 hover:opacity-100 opacity-40 ${isPlaying ? 'animate-pulse-soft' : ''}`}
-                        title={isPlaying ? "Mute Music" : "Play Music"}
-                    >
-                        <Icon 
-                            name={isPlaying ? "Volume2" : "VolumeX"} 
-                            size={16} 
-                            className="text-[#452b2b]" 
-                            strokeWidth={1.5} 
-                        />
-                    </button>
-                </>
-            );
-        };
-
-        const Home = ({ onNavigate }) => {
-            return (
-                <div className="flex flex-col items-center animate-fade-in">
-                    <div className="mb-10 md:mb-14 px-6 flex flex-col items-center mt-2 md:mt-4 text-center w-full relative z-30">
-                        <Icon name="Flower" size={24} className="text-[#d9c5c7] mb-4" strokeWidth={1} />
-                        <p className="text-[10px] md:text-[11px] tracking-[0.55em] text-[#8a7373] mb-6 uppercase font-semibold opacity-80">The Wedding Of</p>
-                        
-                        <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 mb-2">
-                            <h1 className="text-5xl md:text-7xl font-serif italic text-[#452b2b] tracking-tight">Hannah</h1>
-                            <span className="text-4xl md:text-5xl my-1 md:my-0 font-script leading-none" style={{ color: '#e6baba' }}>&</span>
-                            <h1 className="text-5xl md:text-7xl font-serif italic text-[#452b2b] tracking-tight">Aurelius</h1>
-                        </div>
-                        
-                        <div className="mt-8 flex flex-col items-center w-full">
-                            <div className="flex items-center justify-center w-full max-w-lg relative">
-                                <span className="hidden md:block h-[1px] flex-1 bg-[#d9c5c7]/30"></span>
-                                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-0 px-6">
-                                    <div className="md:pr-8 md:text-right text-center">
-                                        <p className="font-sans text-[11px] md:text-[13px] tracking-[0.45em] uppercase text-[#452b2b] font-bold whitespace-nowrap drop-shadow-sm">
-                                            June 28, 2026
-                                        </p>
-                                    </div>
-                                    <div className="h-4 w-[1px] bg-[#d9c5c7] hidden md:block mx-auto"></div>
-                                    <div className="md:pl-8 md:text-left text-center">
-                                        <p className="font-sans text-[11px] md:text-[13px] tracking-[0.45em] uppercase text-[#8a7373] font-semibold whitespace-nowrap drop-shadow-sm">
-                                            Pacifica, CA
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="hidden md:block h-[1px] flex-1 bg-[#d9c5c7]/30"></span>
-                            </div>
-                        </div>
+        const Home = ({ onNavigate }) => (
+            <div className="flex flex-col items-center animate-fade-in">
+                <div className="mb-10 md:mb-14 px-6 flex flex-col items-center mt-2 md:mt-4 text-center w-full relative z-30">
+                    <Icon name="Flower" size={24} className="text-[#d9c5c7] mb-4" strokeWidth={1} />
+                    <p className="text-[10px] md:text-[11px] tracking-[0.55em] text-[#8a7373] mb-6 uppercase font-semibold opacity-80">The Wedding Of</p>
+                    
+                    <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 mb-2">
+                        <h1 className="text-5xl md:text-7xl font-serif italic text-[#452b2b] tracking-tight">Hannah</h1>
+                        <span className="text-4xl md:text-5xl my-1 md:my-0 font-script leading-none" style={{ color: '#e6baba' }}>&</span>
+                        <h1 className="text-5xl md:text-7xl font-serif italic text-[#452b2b] tracking-tight">Aurelius</h1>
                     </div>
                     
-                    <div className="edge-to-edge-container mb-16 md:mb-20 -mt-48 md:-mt-80 lg:-mt-96 relative z-10">
-                        <img 
-                            src="inviteartworkcropped.jpg" 
-                            alt="Cherry Blossoms" 
-                            className="grayscale-[15%] contrast-[1.05] opacity-90 md:opacity-100" 
-                        />
-                    </div>
-
-                    <div className="w-full max-w-4xl mx-auto px-6 mb-16 md:mb-20 text-center">
-                        <div className="flex justify-center mb-8">
-                            <ExactFloralEmblem className="w-14 h-14 text-[#d9c5c7]" />
-                        </div>
-                        <h2 className="font-serif italic text-2xl md:text-4xl text-[#452b2b] mb-6 tracking-tight opacity-90">Wedding Invitation</h2>
-                        <div className="font-serif text-[#8a7373] text-base md:text-lg mb-12 max-w-lg mx-auto leading-relaxed italic">
-                            <p className="mb-4 text-[#452b2b] not-italic font-medium uppercase tracking-[0.2em] text-xs md:text-sm">Hannah & Aurelius</p>
-                            <p className="mb-4">To our dearest friends and family, we would be honored to have you be a part of our special day.</p>
-                            <p>We would like to formally invite you to our wedding!</p>
-                        </div>
-                        <div className="thin-hr mb-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
-                        <div className="flex flex-row items-center justify-center max-w-2xl mx-auto">
-                            <div className="flex-1 text-center px-2">
-                                <p className="text-[9px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] text-[#8a7373] uppercase mb-2 font-bold">When</p>
-                                <p className="font-serif text-sm md:text-xl text-[#452b2b] tracking-wide font-medium">Sunday, June 28th</p>
-                            </div>
-                            <div className="block w-[1px] h-8 md:h-10 bg-[#d9c5c7]"></div>
-                            <div className="flex-1 text-center px-2">
-                                <p className="text-[9px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] text-[#8a7373] uppercase mb-2 font-bold">Where</p>
-                                <p className="font-serif text-sm md:text-xl text-[#452b2b] tracking-wide font-medium">Pacifica, CA</p>
-                            </div>
-                        </div>
-                        <div className="thin-hr mt-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
-                    </div>
-
-                    <div className="w-full max-w-4xl mx-auto px-6 mb-24 md:mb-32">
-                        <div className="text-center mb-16">
-                            <p className="text-[10px] md:text-[11px] tracking-[0.4em] text-[#8a7373] mb-4 uppercase font-bold opacity-80">The Schedule</p>
-                            <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b]">Wedding Timeline</h2>
-                        </div>
-
-                        <div className="relative">
-                            <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-[#d9c5c7] opacity-40"></div>
-                            
-                            <div className="space-y-16 relative">
-                                <div className="space-y-12">
-                                    <div className="relative flex flex-row items-center">
-                                        <div className="w-1/2 pr-6 md:pr-12 text-right">
-                                            <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">1:00 PM</p>
-                                            <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Ceremony Starts</h3>
-                                            <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">True Jesus Church, Pacifica, CA</p>
-                                        </div>
-                                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                            <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
-                                        </div>
-                                        <div className="w-1/2"></div>
-                                    </div>
-
-                                    <div className="relative flex flex-row items-center">
-                                        <div className="w-1/2"></div>
-                                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                            <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
-                                        </div>
-                                        <div className="w-1/2 pl-6 md:pl-12 text-left">
-                                            <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">2:00 PM</p>
-                                            <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Afternoon Tea</h3>
-                                            <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">True Jesus Church, Pacifica, CA</p>
-                                        </div>
-                                    </div>
+                    <div className="mt-8 flex flex-col items-center w-full">
+                        <div className="flex items-center justify-center w-full max-w-lg relative">
+                            <span className="hidden md:block h-[1px] flex-1 bg-[#d9c5c7]/30"></span>
+                            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-0 px-6">
+                                <div className="md:pr-8 md:text-right text-center">
+                                    <p className="font-sans text-[11px] md:text-[13px] tracking-[0.45em] uppercase text-[#452b2b] font-bold whitespace-nowrap drop-shadow-sm">
+                                        June 28, 2026
+                                    </p>
                                 </div>
-
-                                <div className="flex justify-center py-4">
-                                    <div className="bg-[#fdf7f7] px-4">
-                                        <Icon name="Flower2" size={20} className="text-[#d9c5c7]" strokeWidth={1} />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-12">
-                                    <div className="relative flex flex-row items-center">
-                                        <div className="w-1/2 pr-6 md:pr-12 text-right">
-                                            <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">5:00 PM</p>
-                                            <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Cocktail Hour</h3>
-                                            <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
-                                        </div>
-                                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                            <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
-                                        </div>
-                                        <div className="w-1/2"></div>
-                                    </div>
-
-                                    <div className="relative flex flex-row items-center">
-                                        <div className="w-1/2"></div>
-                                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                            <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
-                                        </div>
-                                        <div className="w-1/2 pl-6 md:pl-12 text-left">
-                                            <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">6:30 PM</p>
-                                            <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Dinner Starts</h3>
-                                            <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
-                                        </div>
-                                    </div>
+                                <div className="h-4 w-[1px] bg-[#d9c5c7] hidden md:block mx-auto"></div>
+                                <div className="md:pl-8 md:text-left text-center">
+                                    <p className="font-sans text-[11px] md:text-[13px] tracking-[0.45em] uppercase text-[#8a7373] font-semibold whitespace-nowrap drop-shadow-sm">
+                                        Pacifica, CA
+                                    </p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="w-full max-w-2xl mx-auto px-6 mb-32 relative">
-                        <div className="bg-white/40 border border-[#d9c5c7]/40 p-8 md:p-14 rounded-3xl backdrop-blur-sm text-center shadow-sm">
-                            <div className="mb-8 inline-flex items-center justify-center">
-                                <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
-                                <Icon name="Sparkles" className="mx-4 text-[#d9c5c7]" size={20} />
-                                <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
-                            </div>
-                            
-                            <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b] mb-6 tracking-tight leading-snug uppercase">
-                                RSVP
-                            </h2>
-                            
-                            <p className="font-serif text-[#8a7373] text-base md:text-lg mb-10 max-w-sm mx-auto italic">
-                                Kindly let us know your plans by 
-                                <span className="text-[#452b2b] font-semibold not-italic block mt-1 tracking-wider uppercase text-sm">April 15, 2026</span>
-                            </p>
-                            
-                            <button 
-                                onClick={() => onNavigate('RSVP')}
-                                className="group relative w-full md:w-auto px-14 py-5 bg-transparent text-[#452b2b] font-bold tracking-[0.35em] uppercase hover:bg-[#452b2b] hover:text-white border border-[#452b2b] transition-all duration-500 rounded-full overflow-hidden text-[11px] md:text-xs shadow-sm hover:shadow-lg hover:shadow-[#452b2b]/10"
-                            >
-                                <span className="relative z-10">RSVP HERE</span>
-                            </button>
+                            <span className="hidden md:block h-[1px] flex-1 bg-[#d9c5c7]/30"></span>
                         </div>
                     </div>
                 </div>
-            );
-        };
+                
+                <div className="edge-to-edge-container mb-16 md:mb-20 -mt-48 md:-mt-80 lg:-mt-96 relative z-10">
+                    <img src="inviteartworkcropped.jpg" alt="Cherry Blossoms" className="grayscale-[15%] contrast-[1.05] opacity-90 md:opacity-100" />
+                </div>
 
-        const RSVP = () => (
-            <div className="max-w-3xl mx-auto animate-fade-in pt-4 pb-16 px-6 text-center">
-                <div className="mb-6 flex justify-center">
-                    <ExactFloralEmblem className="w-16 h-16 text-[#d9c5c7]" />
+                <div className="w-full max-w-4xl mx-auto px-6 mb-16 md:mb-20 text-center">
+                    <div className="flex justify-center mb-8">
+                        <ExactFloralEmblem className="w-14 h-14 text-[#d9c5c7]" />
+                    </div>
+                    <h2 className="font-serif italic text-2xl md:text-4xl text-[#452b2b] mb-6 tracking-tight opacity-90">Wedding Invitation</h2>
+                    <div className="font-serif text-[#8a7373] text-base md:text-lg mb-12 max-w-lg mx-auto leading-relaxed italic">
+                        <p className="mb-4 text-[#452b2b] not-italic font-medium uppercase tracking-[0.2em] text-xs md:text-sm">Hannah & Aurelius</p>
+                        <p className="mb-4">To our dearest friends and family, we would be honored to have you be a part of our special day.</p>
+                        <p>We would like to formally invite you to our wedding!</p>
+                    </div>
+                    <div className="thin-hr mb-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
+                    <div className="flex flex-row items-center justify-center max-w-2xl mx-auto">
+                        <div className="flex-1 text-center px-2">
+                            <p className="text-[9px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] text-[#8a7373] uppercase mb-2 font-bold">When</p>
+                            <p className="font-serif text-sm md:text-xl text-[#452b2b] tracking-wide font-medium">Sunday, June 28th</p>
+                        </div>
+                        <div className="block w-[1px] h-8 md:h-10 bg-[#d9c5c7]"></div>
+                        <div className="flex-1 text-center px-2">
+                            <p className="text-[9px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] text-[#8a7373] uppercase mb-2 font-bold">Where</p>
+                            <p className="font-serif text-sm md:text-xl text-[#452b2b] tracking-wide font-medium">Pacifica, CA</p>
+                        </div>
+                    </div>
+                    <div className="thin-hr mt-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
                 </div>
-                
-                <p className="text-[10px] tracking-[0.4em] text-[#8a7373] mb-3 uppercase font-bold">Kindly Reply</p>
-                <h2 className="font-serif italic text-4xl md:text-6xl text-[#452b2b] mb-8">RSVP</h2>
-                
-                <div className="max-w-lg mx-auto bg-white/40 p-10 md:p-14 rounded-[2.5rem] border border-[#d9c5c7]/30 shadow-sm backdrop-blur-md">
-                    <p className="font-serif text-[#8a7373] text-lg md:text-xl leading-relaxed italic mb-8">
-                        We are excited to share the joy with you!<br />
-                        Please click the button below to let us know if you will be attending.
-                    </p>
-                    
-                    <div className="thin-hr mb-8 opacity-40"></div>
-                    
-                    <p className="text-[11px] font-bold tracking-[0.25em] text-[#452b2b] uppercase mb-10">
-                        Deadline: April 15, 2026
-                    </p>
-                    
-                    <a 
-                        href="https://withjoy.com/hannah-aury/rsvp" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-block w-full py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.4em] uppercase rounded-full hover:bg-[#5a3b3b] hover:shadow-xl hover:shadow-[#452b2b]/20 transition-all duration-500 transform hover:-translate-y-1 text-xs"
-                    >
-                        RSVP HERE
-                    </a>
+
+                <div className="w-full max-w-4xl mx-auto px-6 mb-24 md:mb-32">
+                    <div className="text-center mb-16">
+                        <p className="text-[10px] md:text-[11px] tracking-[0.4em] text-[#8a7373] mb-4 uppercase font-bold opacity-80">The Schedule</p>
+                        <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b]">Wedding Timeline</h2>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[1px] bg-[#d9c5c7] opacity-40"></div>
+                        <div className="space-y-16 relative">
+                            <div className="space-y-12">
+                                <div className="relative flex flex-row items-center">
+                                    <div className="w-1/2 pr-6 md:pr-12 text-right">
+                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">1:00 PM</p>
+                                        <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Ceremony Starts</h3>
+                                        <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">True Jesus Church, Pacifica, CA</p>
+                                    </div>
+                                    <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
+                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                    </div>
+                                    <div className="w-1/2"></div>
+                                </div>
+                                <div className="relative flex flex-row items-center">
+                                    <div className="w-1/2"></div>
+                                    <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
+                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                    </div>
+                                    <div className="w-1/2 pl-6 md:pl-12 text-left">
+                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">2:00 PM</p>
+                                        <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Afternoon Tea</h3>
+                                        <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">True Jesus Church, Pacifica, CA</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-center py-4">
+                                <div className="bg-[#fdf7f7] px-4">
+                                    <Icon name="Flower2" size={20} className="text-[#d9c5c7]" strokeWidth={1} />
+                                </div>
+                            </div>
+                            <div className="space-y-12">
+                                <div className="relative flex flex-row items-center">
+                                    <div className="w-1/2 pr-6 md:pr-12 text-right">
+                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">5:00 PM</p>
+                                        <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Cocktail Hour</h3>
+                                        <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
+                                    </div>
+                                    <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
+                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                    </div>
+                                    <div className="w-1/2"></div>
+                                </div>
+                                <div className="relative flex flex-row items-center">
+                                    <div className="w-1/2"></div>
+                                    <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
+                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                    </div>
+                                    <div className="w-1/2 pl-6 md:pl-12 text-left">
+                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1"> 6:30 PM</p>
+                                        <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Dinner Starts</h3>
+                                        <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div className="mt-12 text-[#d9c5c7]">
-                    <Icon name="Flower" size={32} strokeWidth={1} />
+
+                <div className="w-full max-w-2xl mx-auto px-6 mb-32 relative">
+                    <div className="bg-white/40 border border-[#d9c5c7]/40 p-8 md:p-14 rounded-3xl backdrop-blur-sm text-center shadow-sm">
+                        <div className="mb-8 inline-flex items-center justify-center">
+                            <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
+                            <Icon name="Sparkles" className="mx-4 text-[#d9c5c7]" size={20} />
+                            <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
+                        </div>
+                        <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b] mb-6 tracking-tight leading-snug uppercase">RSVP</h2>
+                        <p className="font-serif text-[#8a7373] text-base md:text-lg mb-10 max-w-sm mx-auto italic">Kindly let us know your plans by <span className="text-[#452b2b] font-semibold not-italic block mt-1 tracking-wider uppercase text-sm">April 15, 2026</span></p>
+                        <button onClick={() => onNavigate('RSVP')} className="group relative w-full md:w-auto px-14 py-5 bg-transparent text-[#452b2b] font-bold tracking-[0.35em] uppercase hover:bg-[#452b2b] hover:text-white border border-[#452b2b] transition-all duration-500 rounded-full overflow-hidden text-[11px] md:text-xs shadow-sm hover:shadow-lg hover:shadow-[#452b2b]/10">
+                            <span className="relative z-10">RSVP HERE</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         );
 
-        const OurStory = () => {
-            const stories = [
-                {
-                    title: "How We Met",
-                    text: "We met as tag-alongs while our siblings were hanging out, but we ended up being the ones who couldn't stop talking. Between discovering a 94% Spotify match and a long list of shared interests, we naturally started our journey as a couple."
-                },
-                {
-                    title: "Our Engagement",
-                    text: "Aurelius proposed in May of 2025 under the Golden Gate Bridge, and we had our engagement ceremony with our families in Southern California."
-                },
-                {
-                    title: "The Wedding",
-                    text: "We'll be having our wedding in June of 2026, and we can't wait to share the joy with everyone!"
-                }
-            ];
-
-            return (
-                <div className="max-w-3xl mx-auto animate-fade-in pb-20 px-4">
-                    <div className="text-center mb-16 md:mb-20">
-                        <h2 className="font-serif text-4xl md:text-5xl text-[#452b2b] mb-4 tracking-tight italic">Our Story</h2>
-                    </div>
-                    <div className="space-y-16 md:space-y-24">
-                        {stories.map((story, index) => {
-                            const isEven = index % 2 === 0;
-                            return (
-                                <div key={index} className={`flex flex-row gap-6 md:gap-12 items-center ${isEven ? 'text-left' : 'flex-row-reverse text-right'}`}>
-                                    <div className="flex-1">
-                                        <span className="text-[9px] md:text-xs tracking-[0.3em] text-[#8a7373] font-bold uppercase">Chronicle</span>
-                                        <h3 className="font-serif text-xl md:text-3xl text-[#452b2b] mt-2 md:mt-4 mb-3 md:mb-6">{story.title}</h3>
-                                        <p className="font-serif text-[#8a7373] leading-relaxed italic text-sm md:text-lg">
-                                            {story.text}
-                                        </p>
-                                    </div>
-                                    <div className="w-16 h-16 md:w-40 md:h-40 rounded-full bg-white border border-[#eee0e0] flex items-center justify-center overflow-hidden shrink-0">
-                                        <Icon name={index === 2 ? "BellRing" : index === 1 ? "Gem" : "Heart"} size={24} className="md:w-12 md:h-12 text-[#e6baba]" strokeWidth={1} />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
+        const RSVP = () => (
+            <div className="max-w-3xl mx-auto animate-fade-in pt-4 pb-16 px-6 text-center">
+                <div className="mb-6 flex justify-center"><ExactFloralEmblem className="w-16 h-16 text-[#d9c5c7]" /></div>
+                <p className="text-[10px] tracking-[0.4em] text-[#8a7373] mb-3 uppercase font-bold">Kindly Reply</p>
+                <h2 className="font-serif italic text-4xl md:text-6xl text-[#452b2b] mb-8">RSVP</h2>
+                <div className="max-w-lg mx-auto bg-white/40 p-10 md:p-14 rounded-[2.5rem] border border-[#d9c5c7]/30 shadow-sm backdrop-blur-md">
+                    <p className="font-serif text-[#8a7373] text-lg md:text-xl leading-relaxed italic mb-8">We are excited to share the joy with you!<br />Please click the button below to let us know if you will be attending.</p>
+                    <div className="thin-hr mb-8 opacity-40"></div>
+                    <p className="text-[11px] font-bold tracking-[0.25em] text-[#452b2b] uppercase mb-10">Deadline: April 15, 2026</p>
+                    <a href="https://withjoy.com/hannah-aury/rsvp" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.4em] uppercase rounded-full hover:bg-[#5a3b3b] hover:shadow-xl hover:shadow-[#452b2b]/20 transition-all duration-500 transform hover:-translate-y-1 text-xs">RSVP HERE</a>
                 </div>
-            );
-        };
+            </div>
+        );
+
+        const OurStory = () => (
+            <div className="max-w-3xl mx-auto animate-fade-in pb-20 px-4">
+                <div className="text-center mb-16 md:mb-20">
+                    <h2 className="font-serif text-4xl md:text-5xl text-[#452b2b] mb-4 tracking-tight italic">Our Story</h2>
+                </div>
+                <div className="space-y-16 md:space-y-24">
+                    {[
+                        { title: "How We Met", text: "We met as tag-alongs while our siblings were hanging out, but we ended up being the ones who couldn't stop talking. Between discovering a 94% Spotify match and a long list of shared interests, we naturally started our journey as a couple.", icon: "Heart" },
+                        { title: "Our Engagement", text: "Aurelius proposed in May of 2025 under the Golden Gate Bridge, and we had our engagement ceremony with our families in Southern California.", icon: "Gem" },
+                        { title: "The Wedding", text: "We'll be having our wedding in June of 2026, and we can't wait to share the joy with everyone!", icon: "BellRing" }
+                    ].map((story, index) => (
+                        <div key={index} className={`flex flex-row gap-6 md:gap-12 items-center ${index % 2 === 0 ? 'text-left' : 'flex-row-reverse text-right'}`}>
+                            <div className="flex-1">
+                                <span className="text-[9px] md:text-xs tracking-[0.3em] text-[#8a7373] font-bold uppercase">Chronicle</span>
+                                <h3 className="font-serif text-xl md:text-3xl text-[#452b2b] mt-2 md:mt-4 mb-3 md:mb-6">{story.title}</h3>
+                                <p className="font-serif text-[#8a7373] leading-relaxed italic text-sm md:text-lg">{story.text}</p>
+                            </div>
+                            <div className="w-16 h-16 md:w-40 md:h-40 rounded-full bg-white border border-[#eee0e0] flex items-center justify-center overflow-hidden shrink-0">
+                                <Icon name={story.icon} size={24} className="md:w-12 md:h-12 text-[#e6baba]" strokeWidth={1} />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
 
         const QA = () => (
             <div className="max-w-2xl mx-auto animate-fade-in pb-20 px-4 text-center">
@@ -539,22 +420,10 @@
                 </div>
                 <div className="space-y-8">
                     {[
-                        { 
-                            q: "Dress Code", 
-                            a: "We would love to see our favorite people dressed up with us! While not mandatory, we invite you to join in the celebration by wearing your favorite pastel colors." 
-                        },
-                        { 
-                            q: "Children", 
-                            a: "We have chosen to keep our dinner reception limited to adults. We appreciate your love and can’t wait to celebrate with you!" 
-                        },
-                        { 
-                            q: "Can I bring a plus-one?", 
-                            a: "All are welcome to join us for our church ceremony! However, our reception will be reserved for close friends and family by invitation only. We thank you for your understanding!" 
-                        },
-                        { 
-                            q: "Is there parking available?", 
-                            a: "Yes! Complimentary parking is available on-site, but spots at the venue are quite limited. We kindly ask that you carpool with other guests as much as possible to ensure everyone has a place to park." 
-                        }
+                        { q: "Dress Code", a: "We would love to see our favorite people dressed up with us! While not mandatory, we invite you to join in the celebration by wearing your favorite pastel colors." },
+                        { q: "Children", a: "We have chosen to keep our dinner reception limited to adults. We appreciate your love and can’t wait to celebrate with you!" },
+                        { q: "Can I bring a plus-one?", a: "All are welcome to join us for our church ceremony! However, our reception will be reserved for close friends and family by invitation only. We thank you for your understanding!" },
+                        { q: "Is there parking available?", a: "Yes! Complimentary parking is available on-site, but spots at the venue are quite limited. We kindly ask that you carpool with other guests as much as possible to ensure everyone has a place to park." }
                     ].map((item, i) => (
                         <div key={i} className="bg-white/60 p-8 rounded-2xl border border-[#eee0e0] group hover:border-[#d9c5c7] transition-all duration-300">
                             <h3 className="font-sans font-bold text-[#452b2b] mb-4 uppercase tracking-widest text-[10px] md:text-xs">{item.q}</h3>
@@ -568,18 +437,9 @@
         const Registry = () => (
             <div className="max-w-3xl mx-auto animate-fade-in text-center pb-20 px-4 mt-6 md:mt-10">
                 <h2 className="font-serif text-2xl md:text-3xl text-[#452b2b] mb-4 italic">Wedding Registry</h2>
-                
-                <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">
-                    The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-8 max-w-sm mx-auto">
-                    <a 
-                        href="https://google.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300"
-                    >
+                <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.</p>
+                <div className="max-w-sm mx-auto">
+                    <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
                         <Icon name="Gift" size={32} className="text-[#e6baba] mx-auto mb-6" strokeWidth={1} />
                         <h3 className="font-sans font-bold text-base text-[#452b2b] uppercase tracking-widest">Link to Registry</h3>
                     </a>
@@ -608,7 +468,6 @@
                 <div className="min-h-screen bg-[#fdf7f7] font-sans relative">
                     <FallingBlossoms />
                     <ScatteredBlossoms />
-                    <MusicPlayer />
                     
                     <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
                         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
@@ -660,10 +519,7 @@
                                         >
                                             {link}
                                         </button>
-                                        
-                                        {activeTab === link && (
-                                            <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />
-                                        )}
+                                        {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
                                     </li>
                                 ))}
                             </ul>
