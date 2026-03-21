@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="4.73">
+    <meta name="version" content="4.74">
     <title>Hannah & Aurelius Wedding</title>
     
     <!-- Load Tailwind CSS -->
@@ -459,9 +459,11 @@
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
+            // Improved navigation function to force scroll-to-top on mobile
             const handleNavigate = (tab) => {
                 setActiveTab(tab);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Force an immediate reset of the scroll position to the absolute top
+                window.scrollTo(0, 0);
             };
 
             return (
