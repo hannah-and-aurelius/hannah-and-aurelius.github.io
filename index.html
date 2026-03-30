@@ -5,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hannah & Aurelius Wedding</title>
     
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Load React, ReactDOM, and Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -453,7 +450,7 @@
                     <p className="font-serif text-[#8a7373] text-lg md:text-xl leading-relaxed italic mb-8">We are excited to share the joy with you!<br />Please click the button below to let us know if you will be attending.</p>
                     <div className="thin-hr mb-8 opacity-40"></div>
                     <p className="text-[11px] font-bold tracking-[0.25em] text-[#452b2b] uppercase mb-10">Deadline: April 15, 2026</p>
-                    <a href="https://withjoy.com/hannah-aury/rsvp" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.4em] uppercase rounded-full hover:bg-[#5a3b3b] hover:shadow-xl hover:shadow-[#452b2b]/20 transition-all duration-500 transform hover:-translate-y-1 text-xs">RSVP HERE</a>
+                    <a href="https://withjoy.com/hannah-aurelius/rsvp" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.4em] uppercase rounded-full hover:bg-[#5a3b3b] hover:shadow-xl hover:shadow-[#452b2b]/20 transition-all duration-500 transform hover:-translate-y-1 text-xs">RSVP HERE</a>
                 </div>
             </div>
         );
@@ -465,13 +462,17 @@
                 </div>
                 <div className="space-y-16 md:space-y-24">
                     {[
-                        { title: "How We Met", text: "We met as tag-alongs while our siblings were hanging out, but we ended up being the ones who couldn't stop talking. Between discovering a 94% Spotify match and a long list of shared interests, we naturally started our journey as a couple.", icon: "Heart" },
-                        { title: "Our Engagement", text: "Aurelius proposed in May of 2025 under the Golden Gate Bridge, and we had our engagement ceremony with our families in Southern California.", icon: "Gem" },
-                        { title: "The Wedding", text: "We'll be having our wedding in June of 2026, and we can't wait to share the joy with everyone!", icon: "BellRing" }
+                        { date: "March 2024", title: "How We Met", text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common.", icon: "Heart" },
+                        { date: "June 2024", title: "A New Chapter", text: "After three months of continued conversations, Aurelius decided to ask Hannah to officially start their journey together as a couple.", icon: "Sparkles" },
+                        { date: "September 2024", title: "The First Visit", text: "Aurelius made his first official trip to San Francisco to visit Hannah.", icon: "MapPin" },
+                        { date: "November 2024", title: "Reunion in Asia", text: "We took long distance to the next level! We met halfway in Singapore while Aurelius was in Taiwan and Hannah was in Singapore visiting family.", icon: "Plane" },
+                        { date: "December 2024", title: "Southern California Winter", text: "Hannah traveled to Southern California to serve as a counselor for Winter SSC, where she officially met the rest of the family afterwards!", icon: "Users" },
+                        { date: "May 2025", title: "Our Proposal", text: "Aurelius proposed in San Francisco! We then had our engagement ceremony in Southern California with our families.", icon: "Gem" },
+                        { date: "June 2026", title: "Our Wedding", text: "We are officially getting married! We are so thankful for God's guidance throughout our entire story—from our very first meeting to leading us through our relationship to where we are today. We know this journey wouldn't have been possible without Him, and we can’t wait to share the joy on our wedding day with all of you. We are so excited to see you in just a few months!", icon: "BellRing" }
                     ].map((story, index) => (
                         <div key={index} className={`flex flex-row gap-6 md:gap-12 items-center ${index % 2 === 0 ? 'text-left' : 'flex-row-reverse text-right'}`}>
                             <div className="flex-1">
-                                <span className="text-[9px] md:text-xs tracking-[0.3em] text-[#8a7373] font-bold uppercase">Chronicle</span>
+                                <span className="text-[9px] md:text-xs tracking-[0.3em] text-[#8a7373] font-bold uppercase">{story.date}</span>
                                 <h3 className="font-serif text-xl md:text-3xl text-[#452b2b] mt-2 md:mt-4 mb-3 md:mb-6">{story.title}</h3>
                                 <p className="font-serif text-[#8a7373] leading-relaxed italic text-sm md:text-lg">{story.text}</p>
                             </div>
@@ -511,7 +512,7 @@
                 <h2 className="font-serif text-2xl md:text-3xl text-[#452b2b] mb-4 italic">Wedding Registry</h2>
                 <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.</p>
                 <div className="max-w-sm mx-auto">
-                    <a href="#" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
+                    <a href="https://withjoy.com/hannah-aurelius/registry" target="_blank" rel="noopener noreferrer" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
                         <Icon name="Gift" size={32} className="text-[#e6baba] mx-auto mb-6" strokeWidth={1} />
                         <h3 className="font-sans font-bold text-base text-[#452b2b] uppercase tracking-widest">Link to Registry</h3>
                     </a>
@@ -536,9 +537,34 @@
             }, []);
 
             useEffect(() => {
+                // Change this line to your local filename
+                const audio = new Audio('starlight.mp3'); 
+                
+                audio.loop = true;
+                audio.volume = 0.5;
+                audioRef.current = audio;
+                
+                // Pre-load audio
+                audio.load();
+                
+                return () => {
+                    if (audioRef.current) {
+                        audioRef.current.pause();
+                        audioRef.current = null;
+                    }
+                };
+            }, []);
+
+            useEffect(() => {
                 if (audioRef.current) {
                     if (isPlaying) {
-                        audioRef.current.play().catch(e => console.log("Autoplay blocked"));
+                        const playPromise = audioRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.error("Audio playback error:", error);
+                                setIsPlaying(false);
+                            });
+                        }
                     } else {
                         audioRef.current.pause();
                     }
@@ -553,18 +579,18 @@
 
             const handleOpen = () => {
                 setIsOpened(true);
-                setIsPlaying(true);
+                // Trigger play immediately within user interaction handler for best browser compatibility
+                if (audioRef.current) {
+                    audioRef.current.play().then(() => {
+                        setIsPlaying(true);
+                    }).catch(e => {
+                        console.error("Interaction failed to start music:", e);
+                    });
+                }
             };
 
             return (
                 <div className="min-h-screen bg-[#fdf7f7] font-sans relative">
-                    {/* Audio Element - Mozart: The Marriage of Figaro */}
-                    <audio 
-                        ref={audioRef}
-                        src="https://www.chosic.com/wp-content/uploads/2021/04/Mozart-Le-Nozze-di-Figaro-The-Marriage-of-Figaro.mp3" 
-                        loop
-                    />
-
                     {!isOpened ? (
                         <EntryScreen onOpen={handleOpen} />
                     ) : (

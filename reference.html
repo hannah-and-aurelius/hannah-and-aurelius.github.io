@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="version" content="4.75">
     <title>Hannah & Aurelius Wedding</title>
     
     <!-- Load Tailwind CSS -->
@@ -31,11 +30,19 @@
         }
         .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
         
-        @keyframes pulse-soft {
-            0%, 100% { transform: scale(1); opacity: 0.4; }
-            50% { transform: scale(1.05); opacity: 0.6; }
+        @keyframes pulse-text {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
-        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+        .animate-pulse-text { animation: pulse-text 2s ease-in-out infinite; }
+
+        @keyframes audio-bar {
+            0%, 100% { height: 4px; }
+            50% { height: 16px; }
+        }
+        .audio-anim-1 { animation: audio-bar 0.6s infinite 0.1s; }
+        .audio-anim-2 { animation: audio-bar 0.8s infinite 0.2s; }
+        .audio-anim-3 { animation: audio-bar 0.7s infinite 0.3s; }
 
         @keyframes fall {
             0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
@@ -85,7 +92,6 @@
             object-fit: cover;
         }
 
-        /* Paper Texture for Entry Card */
         .paper-texture {
             background-color: #fdfaf5;
             background-image: url("https://www.transparenttextures.com/patterns/handmade-paper.png");
@@ -136,12 +142,12 @@
             return <span ref={iconRef} className="inline-flex items-center justify-center" />;
         };
 
-        const ScriptLogo = ({ className = "" }) => (
+        const ScriptLogo = ({ className = "", color = "#452b2b" }) => (
             <div className={`flex items-center justify-center ${className}`}>
                 <div className="flex items-center gap-1.5">
-                    <span className="font-serif text-lg md:text-xl text-[#452b2b] font-medium leading-none">H</span>
-                    <span className="font-logo text-lg md:text-xl leading-none" style={{ color: '#e6baba' }}>&</span>
-                    <span className="font-serif text-lg md:text-xl text-[#452b2b] font-medium leading-none">A</span>
+                    <span className="font-serif text-lg md:text-xl font-medium leading-none" style={{ color: color }}>H</span>
+                    <span className="font-logo text-lg md:text-xl leading-none" style={{ color: color === "#452b2b" ? '#e6baba' : color }}>&</span>
+                    <span className="font-serif text-lg md:text-xl font-medium leading-none" style={{ color: color }}>A</span>
                 </div>
             </div>
         );
@@ -245,12 +251,9 @@
             return (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#fdf7f7] px-6">
                     <div className="relative group max-w-sm w-full animate-fade-in">
-                        {/* Shadow underneath */}
                         <div className="absolute inset-0 blur-2xl bg-black/5 -bottom-4 -right-4 rounded-xl"></div>
                         
-                        {/* Main Paper Card */}
                         <div className="paper-texture relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-8 border border-white/50 cursor-pointer" onClick={onOpen}>
-                            {/* Decorative border */}
                             <div className="absolute inset-4 border border-[#d9c5c7]/30 rounded-lg pointer-events-none"></div>
                             
                             <div className="mb-8 opacity-60">
@@ -263,26 +266,42 @@
                                 <span className="font-serif italic text-3xl text-[#452b2b]">The Wedding of</span>
                                 <div className="h-px w-8 bg-[#d9c5c7] my-4 opacity-50"></div>
                                 <div className="flex items-center gap-3">
-                                    <span className="font-serif text-3xl text-[#452b2b] font-medium">Hannah</span>
+                                    <span className="font-script text-4xl text-[#452b2b]">Hannah</span>
                                     <span className="font-script text-2xl" style={{ color: '#e6baba' }}>&</span>
-                                    <span className="font-serif text-3xl text-[#452b2b] font-medium">Aurelius</span>
+                                    <span className="font-script text-4xl text-[#452b2b]">Aurelius</span>
                                 </div>
                             </div>
 
-                            {/* Wax Seal Button */}
                             <div className="relative flex flex-col items-center group/seal">
                                 <div className="wax-seal w-20 h-20 rounded-full flex items-center justify-center relative z-10">
-                                    <div className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center">
-                                        <ScriptLogo className="scale-75 invert opacity-90" />
+                                    <div className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center bg-[#e6baba]/20">
+                                        <ScriptLogo className="scale-75" color="#e6baba" />
                                     </div>
                                 </div>
-                                <div className="mt-8 text-center">
-                                    <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-[#8a7373] group-hover/seal:text-[#452b2b] transition-colors duration-500 font-bold">Tap to Open</p>
-                                    <div className="mt-2 h-[1.5px] w-4 bg-[#e6baba] mx-auto opacity-60 group-hover/seal:w-12 transition-all duration-700"></div>
+                                <div className="mt-8 text-center animate-pulse-text">
+                                    <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-[#452b2b] font-bold">Tap to Open</p>
+                                    <div className="mt-2 h-[1.5px] w-12 bg-[#e6baba] mx-auto opacity-60"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            );
+        };
+
+        const MusicPlayer = ({ isPlaying, setIsPlaying }) => {
+            return (
+                <div className="fixed bottom-8 left-8 z-[150] flex items-center gap-4">
+                    <button 
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className="w-12 h-12 rounded-full bg-white/60 backdrop-blur-md border border-[#d9c5c7]/40 flex items-center justify-center shadow-sm hover:bg-white transition-all group"
+                    >
+                        <div className="flex items-center gap-[3px] h-5">
+                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-1' : 'h-[2px] self-center'}`}></div>
+                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-2' : 'h-[2px] self-center'}`}></div>
+                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-3' : 'h-[2px] self-center'}`}></div>
+                        </div>
+                    </button>
                 </div>
             );
         };
@@ -492,7 +511,7 @@
                 <h2 className="font-serif text-2xl md:text-3xl text-[#452b2b] mb-4 italic">Wedding Registry</h2>
                 <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.</p>
                 <div className="max-w-sm mx-auto">
-                    <a href="https://google.com" target="_blank" rel="noopener noreferrer" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
+                    <a href="#" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
                         <Icon name="Gift" size={32} className="text-[#e6baba] mx-auto mb-6" strokeWidth={1} />
                         <h3 className="font-sans font-bold text-base text-[#452b2b] uppercase tracking-widest">Link to Registry</h3>
                     </a>
@@ -505,6 +524,9 @@
             const [activeTab, setActiveTab] = useState('Home');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             const [scrolled, setScrolled] = useState(false);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const audioRef = useRef(null);
+
             const navLinks = ['Home', 'RSVP', 'Our Story', 'Q&A', 'Registry'];
 
             useEffect(() => {
@@ -513,93 +535,115 @@
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
+            useEffect(() => {
+                if (audioRef.current) {
+                    if (isPlaying) {
+                        audioRef.current.play().catch(e => console.log("Autoplay blocked"));
+                    } else {
+                        audioRef.current.pause();
+                    }
+                }
+            }, [isPlaying]);
+
             const handleNavigate = (tab) => {
                 setActiveTab(tab);
+                setIsMenuOpen(false);
                 window.scrollTo(0, 0);
             };
 
             const handleOpen = () => {
                 setIsOpened(true);
+                setIsPlaying(true);
             };
-
-            if (!isOpened) {
-                return <EntryScreen onOpen={handleOpen} />;
-            }
 
             return (
                 <div className="min-h-screen bg-[#fdf7f7] font-sans relative">
-                    <FallingBlossoms />
-                    <ScatteredBlossoms />
-                    
-                    <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
-                        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-                            <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
-                                <div className="flex flex-col gap-1 w-6 items-end">
-                                    <div className="h-[1.5px] w-full bg-[#452b2b] transition-all group-hover:bg-[#d9c5c7]"></div>
-                                    <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full group-hover:bg-[#d9c5c7]"></div>
-                                </div>
-                                <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block group-hover:text-[#d9c5c7] transition-colors">Menu</span>
-                            </button>
-                            <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
-                            <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 pt-[9px] pb-[11px] border border-[#452b2b] rounded-full hidden md:flex items-center justify-center h-10 min-w-[110px]">
-                                <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
-                                <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
-                            </button>
-                            <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
-                        </div>
-                    </header>
+                    {/* Audio Element - Mozart: The Marriage of Figaro */}
+                    <audio 
+                        ref={audioRef}
+                        src="https://www.chosic.com/wp-content/uploads/2021/04/Mozart-Le-Nozze-di-Figaro-The-Marriage-of-Figaro.mp3" 
+                        loop
+                    />
 
-                    <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                        <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
-                        <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
-                            <div className="flex justify-end items-center mb-24">
-                                <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
-                            </div>
-                            <nav className="flex flex-col gap-10">
-                                {navLinks.map((link) => (
-                                    <button key={link} onClick={() => {handleNavigate(link); setIsMenuOpen(false);}} className="group text-left">
-                                        <div className="flex items-baseline gap-4">
-                                            <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
-                                            <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
+                    {!isOpened ? (
+                        <EntryScreen onOpen={handleOpen} />
+                    ) : (
+                        <div className="animate-fade-in">
+                            <FallingBlossoms />
+                            <ScatteredBlossoms />
+                            <MusicPlayer isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
+                            
+                            <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
+                                <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+                                    <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
+                                        <div className="flex flex-col gap-1 w-6 items-end">
+                                            <div className="h-[1.5px] w-full bg-[#452b2b] transition-all group-hover:bg-[#d9c5c7]"></div>
+                                            <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full group-hover:bg-[#d9c5c7]"></div>
                                         </div>
+                                        <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block group-hover:text-[#d9c5c7] transition-colors">Menu</span>
                                     </button>
-                                ))}
+                                    <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
+                                    <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 pt-[9px] pb-[11px] border border-[#452b2b] rounded-full hidden md:flex items-center justify-center h-10 min-w-[110px]">
+                                        <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
+                                        <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+                                    </button>
+                                    <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
+                                </div>
+                            </header>
+
+                            <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                                <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
+                                <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
+                                    <div className="flex justify-end items-center mb-24">
+                                        <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
+                                    </div>
+                                    <nav className="flex flex-col gap-10">
+                                        {navLinks.map((link) => (
+                                            <button key={link} onClick={() => handleNavigate(link)} className="group text-left">
+                                                <div className="flex items-baseline gap-4">
+                                                    <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
+                                                    <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
+                            </div>
+
+                            <div className="h-16" />
+                            <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
+                                <div className="max-w-4xl mx-auto flex justify-center">
+                                    <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm overflow-hidden">
+                                        {navLinks.map((link) => (
+                                            <li key={link} className="relative rounded-full">
+                                                <button 
+                                                    onClick={() => handleNavigate(link)} 
+                                                    className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
+                                                >
+                                                    {link}
+                                                </button>
+                                                {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </nav>
+
+                            <main className="max-w-5xl mx-auto pt-4 md:pt-8 relative z-10 px-6">
+                                {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
+                                {activeTab === 'RSVP' && <RSVP />}
+                                {activeTab === 'Our Story' && <OurStory />}
+                                {activeTab === 'Q&A' && <QA />}
+                                {activeTab === 'Registry' && <Registry />}
+                            </main>
+
+                            <footer className="mt-40 text-center pb-20 relative z-10">
+                                <ExactFloralEmblem className="w-16 h-16 opacity-60 mx-auto mb-6 text-[#d9c5c7]" />
+                                <ScriptLogo className="mx-auto scale-125" />
+                                <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
+                            </footer>
                         </div>
-                    </div>
-
-                    <div className="h-16" />
-                    <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
-                        <div className="max-w-4xl mx-auto flex justify-center">
-                            <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm overflow-hidden">
-                                {navLinks.map((link) => (
-                                    <li key={link} className="relative rounded-full">
-                                        <button 
-                                            onClick={() => handleNavigate(link)} 
-                                            className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
-                                        >
-                                            {link}
-                                        </button>
-                                        {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </nav>
-
-                    <main className="max-w-5xl mx-auto pt-4 md:pt-8 relative z-10 px-6">
-                        {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
-                        {activeTab === 'RSVP' && <RSVP />}
-                        {activeTab === 'Our Story' && <OurStory />}
-                        {activeTab === 'Q&A' && <QA />}
-                        {activeTab === 'Registry' && <Registry />}
-                    </main>
-
-                    <footer className="mt-40 text-center pb-20 relative z-10">
-                        <ExactFloralEmblem className="w-16 h-16 opacity-60 mx-auto mb-6 text-[#d9c5c7]" />
-                        <ScriptLogo className="mx-auto scale-125" />
-                        <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
-                    </footer>
+                    )}
                 </div>
             );
         }
