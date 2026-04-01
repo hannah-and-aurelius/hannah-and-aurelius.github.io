@@ -476,7 +476,7 @@
                         { 
                             date: "March 2024", 
                             title: "How We Met", 
-                            text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common ✨", 
+                            text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common ◡̈", 
                             icon: "Heart",
                             image: "laughing.jpg"
                         },
@@ -525,7 +525,13 @@
                     ].map((story, index) => (
                         <div key={index} className="flex flex-col gap-8 md:gap-12">
                             <div className="w-full aspect-video md:aspect-[16/7] rounded-3xl overflow-hidden shadow-md border border-white/50">
-                                <img src={story.image} alt={story.title} className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700 hover:scale-105" />
+                                <img 
+                                    src={story.image} 
+                                    alt={story.title} 
+                                    className={`w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700 hover:scale-105 ${
+                                        story.image === 'firstvisit.jpg' ? 'object-[center_85%]' : 'object-center'
+                                    }`} 
+                                />
                             </div>
                             
                             <div className={`flex flex-row gap-6 md:gap-12 items-center ${index % 2 === 0 ? 'text-left' : 'flex-row-reverse text-right'}`}>
