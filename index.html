@@ -37,8 +37,8 @@
         .animate-pulse-text { animation: pulse-text 2s ease-in-out infinite; }
 
         @keyframes audio-bar {
-            0%, 100% { height: 4px; }
-            50% { height: 16px; }
+            0%, 100% { height: 2px; }
+            50% { height: 8px; }
         }
         .audio-anim-1 { animation: audio-bar 0.6s infinite 0.1s; }
         .audio-anim-2 { animation: audio-bar 0.8s infinite 0.2s; }
@@ -67,6 +67,16 @@
             width: 100%;
             background-color: #fdf7f7;
             color: #452b2b;
+            overscroll-behavior: none;
+        }
+
+        /* Essential Scroll Lock Class */
+        body.is-locked {
+            overflow: hidden !important;
+            height: 100vh !important;
+            position: fixed !important;
+            width: 100% !important;
+            touch-action: none;
         }
 
         .thin-hr {
@@ -116,11 +126,23 @@
         }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="is-locked">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
+
+        const forceReleaseScroll = () => {
+            const b = document.body;
+            b.classList.remove('is-locked');
+            b.style.overflow = 'visible';
+            b.style.height = 'auto';
+            b.style.position = 'relative';
+            b.style.touchAction = 'auto';
+            document.documentElement.style.overflow = 'visible';
+            document.documentElement.style.height = 'auto';
+            window.dispatchEvent(new Event('resize'));
+        };
         
         const Icon = ({ name, size = 24, strokeWidth = 2, className = "" }) => {
             const iconRef = useRef(null);
@@ -253,7 +275,10 @@
                     <div className="relative group max-w-sm w-full animate-fade-in">
                         <div className="absolute inset-0 blur-2xl bg-black/5 -bottom-4 -right-4 rounded-xl"></div>
                         
-                        <div className="paper-texture relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-8 border border-white/50 cursor-pointer" onClick={onOpen}>
+                        <div 
+                          className="paper-texture relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-8 border border-white/50 cursor-pointer"
+                          onClick={onOpen}
+                        >
                             <div className="absolute inset-4 border border-[#d9c5c7]/30 rounded-lg pointer-events-none"></div>
                             
                             <div className="mb-8 opacity-60">
@@ -285,23 +310,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            );
-        };
-
-        const MusicPlayer = ({ isPlaying, setIsPlaying }) => {
-            return (
-                <div className="fixed bottom-8 left-8 z-[150] flex items-center gap-4">
-                    <button 
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className="w-12 h-12 rounded-full bg-white/60 backdrop-blur-md border border-[#d9c5c7]/40 flex items-center justify-center shadow-sm hover:bg-white transition-all group"
-                    >
-                        <div className="flex items-center gap-[3px] h-5">
-                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-1' : 'h-[2px] self-center'}`}></div>
-                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-2' : 'h-[2px] self-center'}`}></div>
-                            <div className={`w-[2px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-3' : 'h-[2px] self-center'}`}></div>
-                        </div>
-                    </button>
                 </div>
             );
         };
@@ -468,7 +476,7 @@
                         { 
                             date: "March 2024", 
                             title: "How We Met", 
-                            text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common.", 
+                            text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common ✨", 
                             icon: "Heart",
                             image: "laughing.jpg"
                         },
@@ -477,7 +485,7 @@
                             title: "A New Chapter", 
                             text: "After three months of continued conversations, Aurelius decided to ask Hannah to officially start their journey together as a couple.", 
                             icon: "Sparkles",
-                            image: "firstmeet.png"
+                            image: "firstmeetletsgo.png"
                         },
                         { 
                             date: "September 2024", 
@@ -516,12 +524,10 @@
                         }
                     ].map((story, index) => (
                         <div key={index} className="flex flex-col gap-8 md:gap-12">
-                            {/* Unsplash Image above section */}
-                            <div className="w-full h-48 md:h-72 rounded-3xl overflow-hidden shadow-md border border-white/50">
+                            <div className="w-full aspect-video md:aspect-[16/7] rounded-3xl overflow-hidden shadow-md border border-white/50">
                                 <img src={story.image} alt={story.title} className="w-full h-full object-cover grayscale-[10%] hover:grayscale-0 transition-all duration-700 hover:scale-105" />
                             </div>
                             
-                            {/* Original Layout Section */}
                             <div className={`flex flex-row gap-6 md:gap-12 items-center ${index % 2 === 0 ? 'text-left' : 'flex-row-reverse text-right'}`}>
                                 <div className="flex-1">
                                     <span className="text-[9px] md:text-xs tracking-[0.3em] text-[#8a7373] font-bold uppercase">{story.date}</span>
@@ -587,19 +593,15 @@
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 100);
-                window.addEventListener('scroll', handleScroll);
+                window.addEventListener('scroll', handleScroll, { passive: true });
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
             useEffect(() => {
-                // Using a high-reliability piano track for wedding vibe
                 const audio = new Audio('starlight.mp3');
                 audio.loop = true;
-                audio.volume = 0.5;
+                audio.volume = 0.4;
                 audioRef.current = audio;
-                
-                // Pre-load audio
-                audio.load();
                 
                 return () => {
                     if (audioRef.current) {
@@ -609,38 +611,41 @@
                 };
             }, []);
 
-            useEffect(() => {
-                if (audioRef.current) {
-                    if (isPlaying) {
-                        const playPromise = audioRef.current.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                console.error("Audio playback error:", error);
-                                setIsPlaying(false);
-                            });
-                        }
-                    } else {
-                        audioRef.current.pause();
-                    }
-                }
-            }, [isPlaying]);
-
             const handleNavigate = (tab) => {
+                forceReleaseScroll();
                 setActiveTab(tab);
                 setIsMenuOpen(false);
-                window.scrollTo(0, 0);
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            };
+
+            const toggleMusic = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                if (!audioRef.current) return;
+                
+                if (isPlaying) {
+                    audioRef.current.pause();
+                    setIsPlaying(false);
+                } else {
+                    audioRef.current.play().catch(console.error);
+                    setIsPlaying(true);
+                }
             };
 
             const handleOpen = () => {
+                forceReleaseScroll();
                 setIsOpened(true);
-                // Trigger play immediately within user interaction handler for best browser compatibility
                 if (audioRef.current) {
-                    audioRef.current.play().then(() => {
-                        setIsPlaying(true);
-                    }).catch(e => {
-                        console.error("Interaction failed to start music:", e);
-                    });
+                    audioRef.current.play()
+                        .then(() => setIsPlaying(true))
+                        .catch(() => console.warn("Autoplay blocked."));
                 }
+                setTimeout(() => {
+                    forceReleaseScroll();
+                    window.scrollTo(0, 0);
+                }, 10);
             };
 
             return (
@@ -648,81 +653,97 @@
                     {!isOpened ? (
                         <EntryScreen onOpen={handleOpen} />
                     ) : (
-                        <div className="animate-fade-in">
-                            <FallingBlossoms />
-                            <ScatteredBlossoms />
-                            <MusicPlayer isPlaying={isPlaying} setIsPlaying={setIsPlaying} />
-                            
-                            <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
-                                <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-                                    <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
-                                        <div className="flex flex-col gap-1 w-6 items-end">
-                                            <div className="h-[1.5px] w-full bg-[#452b2b] transition-all group-hover:bg-[#d9c5c7]"></div>
-                                            <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full group-hover:bg-[#d9c5c7]"></div>
-                                        </div>
-                                        <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block group-hover:text-[#d9c5c7] transition-colors">Menu</span>
-                                    </button>
-                                    <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
-                                    <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 pt-[9px] pb-[11px] border border-[#452b2b] rounded-full hidden md:flex items-center justify-center h-10 min-w-[110px]">
-                                        <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
-                                        <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
-                                    </button>
-                                    <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
-                                </div>
-                            </header>
-
-                            <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                                <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
-                                <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
-                                    <div className="flex justify-end items-center mb-24">
-                                        <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
+                        <React.Fragment>
+                            {/* MINI MUSIC TOGGLE */}
+                            <div className="fixed bottom-6 left-6 z-[9999] pointer-events-auto">
+                                <button 
+                                    onClick={toggleMusic}
+                                    className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md border border-[#d9c5c7]/50 flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition-all duration-300 cursor-pointer"
+                                    aria-label="Toggle Music"
+                                >
+                                    <div className="flex items-center gap-[2px] h-3">
+                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-1' : 'h-[2px] self-center'}`}></div>
+                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-2' : 'h-[2px] self-center'}`}></div>
+                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-3' : 'h-[2px] self-center'}`}></div>
                                     </div>
-                                    <nav className="flex flex-col gap-10">
-                                        {navLinks.map((link) => (
-                                            <button key={link} onClick={() => handleNavigate(link)} className="group text-left">
-                                                <div className="flex items-baseline gap-4">
-                                                    <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
-                                                    <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
-                                                </div>
-                                            </button>
-                                        ))}
-                                    </nav>
-                                </div>
+                                </button>
                             </div>
 
-                            <div className="h-16" />
-                            <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
-                                <div className="max-w-4xl mx-auto flex justify-center">
-                                    <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm overflow-hidden">
-                                        {navLinks.map((link) => (
-                                            <li key={link} className="relative rounded-full">
-                                                <button 
-                                                    onClick={() => handleNavigate(link)} 
-                                                    className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
-                                                >
-                                                    {link}
+                            <div className="animate-fade-in relative z-10">
+                                <FallingBlossoms />
+                                <ScatteredBlossoms />
+                                
+                                <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
+                                    <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+                                        <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
+                                            <div className="flex flex-col gap-1 w-6 items-end">
+                                                <div className="h-[1.5px] w-full bg-[#452b2b] transition-all group-hover:bg-[#d9c5c7]"></div>
+                                                <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full group-hover:bg-[#d9c5c7]"></div>
+                                            </div>
+                                            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block group-hover:text-[#d9c5c7] transition-colors">Menu</span>
+                                        </button>
+                                        <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
+                                        <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 pt-[9px] pb-[11px] border border-[#452b2b] rounded-full hidden md:flex items-center justify-center h-10 min-w-[110px]">
+                                            <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
+                                            <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+                                        </button>
+                                        <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
+                                    </div>
+                                </header>
+
+                                <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                                    <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
+                                    <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
+                                        <div className="flex justify-end items-center mb-24">
+                                            <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
+                                        </div>
+                                        <nav className="flex flex-col gap-10">
+                                            {navLinks.map((link) => (
+                                                <button key={link} onClick={() => handleNavigate(link)} className="group text-left">
+                                                    <div className="flex items-baseline gap-4">
+                                                        <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
+                                                        <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
+                                                    </div>
                                                 </button>
-                                                {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                            ))}
+                                        </nav>
+                                    </div>
                                 </div>
-                            </nav>
 
-                            <main className="max-w-5xl mx-auto pt-4 md:pt-8 relative z-10 px-6">
-                                {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
-                                {activeTab === 'RSVP' && <RSVP />}
-                                {activeTab === 'Our Story' && <OurStory />}
-                                {activeTab === 'Q&A' && <QA />}
-                                {activeTab === 'Registry' && <Registry />}
-                            </main>
+                                <div className="h-16" />
+                                <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
+                                    <div className="max-w-4xl mx-auto flex justify-center">
+                                        <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm overflow-hidden">
+                                            {navLinks.map((link) => (
+                                                <li key={link} className="relative rounded-full">
+                                                    <button 
+                                                        onClick={() => handleNavigate(link)} 
+                                                        className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
+                                                    >
+                                                        {link}
+                                                    </button>
+                                                    {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </nav>
 
-                            <footer className="mt-40 text-center pb-20 relative z-10">
-                                <ExactFloralEmblem className="w-16 h-16 opacity-60 mx-auto mb-6 text-[#d9c5c7]" />
-                                <ScriptLogo className="mx-auto scale-125" />
-                                <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
-                            </footer>
-                        </div>
+                                <main className="max-w-5xl mx-auto pt-4 md:pt-8 relative z-10 px-6">
+                                    {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
+                                    {activeTab === 'RSVP' && <RSVP />}
+                                    {activeTab === 'Our Story' && <OurStory />}
+                                    {activeTab === 'Q&A' && <QA />}
+                                    {activeTab === 'Registry' && <Registry />}
+                                </main>
+
+                                <footer className="mt-40 text-center pb-20 relative z-10">
+                                    <ExactFloralEmblem className="w-16 h-16 opacity-60 mx-auto mb-6 text-[#d9c5c7]" />
+                                    <ScriptLogo className="mx-auto scale-125" />
+                                    <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
+                                </footer>
+                            </div>
+                        </React.Fragment>
                     )}
                 </div>
             );
