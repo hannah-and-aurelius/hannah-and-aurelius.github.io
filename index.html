@@ -1,24 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="overflow-x-hidden">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hannah & Aurelius Wedding</title>
-    <meta name="title" content="Hannah & Aurelius Wedding">
-    <meta name="description" content="We're getting married! Join us on June 28, 2026.">
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://hannah-and-aurelius.github.io/">
-    <meta property="og:title" content="Hannah & Aurelius Wedding">
-    <meta property="og:description" content="We're getting married! Join us on June 28, 2026.">
-    <meta property="og:image" content="https://hannah-and-aurelius.github.io/inviteartworkcropped.jpg">
-
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://hannah-and-aurelius.github.io/">
-    <meta property="twitter:title" content="Hannah & Aurelius Wedding">
-    <meta property="twitter:description" content="We're getting married! Join us on June 28, 2026.">
-    <meta property="twitter:image" content="https://hannah-and-aurelius.github.io/inviteartworkcropped.jpg">
     
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,7 +38,7 @@
 
         @keyframes audio-bar {
             0%, 100% { height: 2px; }
-            50% { height: 8px; }
+            50% { height: 6px; }
         }
         .audio-anim-1 { animation: audio-bar 0.6s infinite 0.1s; }
         .audio-anim-2 { animation: audio-bar 0.8s infinite 0.2s; }
@@ -63,7 +48,7 @@
             0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
             5% { opacity: 1; }
             95% { opacity: 1; }
-            100% { transform: translateY(115vh) translateX(120px) rotate(450deg); opacity: 0; }
+            100% { transform: translateY(115vh) translateX(50px) rotate(450deg); opacity: 0; }
         }
 
         .falling-blossom {
@@ -74,24 +59,37 @@
             z-index: 80;
         }
 
-        body::-webkit-scrollbar { display: none; }
-        body { 
-            -ms-overflow-style: none; 
-            scrollbar-width: none; 
-            overflow-x: hidden; 
+        html, body {
+            margin: 0;
+            padding: 0;
             width: 100%;
             background-color: #fdf7f7;
             color: #452b2b;
-            overscroll-behavior: none;
         }
 
-        /* Essential Scroll Lock Class */
         body.is-locked {
             overflow: hidden !important;
             height: 100vh !important;
             position: fixed !important;
             width: 100% !important;
-            touch-action: none;
+        }
+
+        body.is-unlocked {
+            overflow-y: visible !important;
+            overflow-x: hidden !important;
+            height: auto !important;
+            position: relative !important;
+        }
+
+        body::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #persistent-music-toggle {
+            position: fixed !important;
+            bottom: 24px !important;
+            left: 24px !important;
+            z-index: 9999 !important;
+            display: none; 
         }
 
         .thin-hr {
@@ -101,16 +99,15 @@
             opacity: 0.6;
         }
 
-        .edge-to-edge-container {
-            width: 100vw;
-            margin-left: calc(50% - 50vw);
-            margin-right: calc(50% - 50vw);
-            position: relative;
-            box-sizing: border-box;
+        .full-window-image-container {
+            width: 100%;
             overflow: hidden;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        .edge-to-edge-container img {
+        .full-window-image-container img {
             width: 100%;
             height: auto;
             display: block;
@@ -144,21 +141,20 @@
 <body class="is-locked">
     <div id="root"></div>
 
+    <div id="persistent-music-toggle">
+        <!-- Made music button smaller: w-8 h-8 -->
+        <button id="music-btn" class="w-8 h-8 rounded-full bg-white/95 backdrop-blur-md border border-[#d9c5c7]/60 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.15)] hover:bg-white hover:scale-110 active:scale-95 transition-all duration-300">
+            <div class="flex items-center gap-[2px] h-2">
+                <div id="bar-1" class="w-[1.5px] bg-[#452b2b] rounded-full h-[2px] self-center"></div>
+                <div id="bar-2" class="w-[1.5px] bg-[#452b2b] rounded-full h-[2px] self-center"></div>
+                <div id="bar-3" class="w-[1.5px] bg-[#452b2b] rounded-full h-[2px] self-center"></div>
+            </div>
+        </button>
+    </div>
+
     <script type="text/babel">
         const { useState, useEffect, useRef, useMemo } = React;
 
-        const forceReleaseScroll = () => {
-            const b = document.body;
-            b.classList.remove('is-locked');
-            b.style.overflow = 'visible';
-            b.style.height = 'auto';
-            b.style.position = 'relative';
-            b.style.touchAction = 'auto';
-            document.documentElement.style.overflow = 'visible';
-            document.documentElement.style.height = 'auto';
-            window.dispatchEvent(new Event('resize'));
-        };
-        
         const Icon = ({ name, size = 24, strokeWidth = 2, className = "" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
@@ -286,22 +282,18 @@
 
         const EntryScreen = ({ onOpen }) => {
             return (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#fdf7f7] px-6">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#fdf7f7] px-6 overflow-hidden">
                     <div className="relative group max-w-sm w-full animate-fade-in">
                         <div className="absolute inset-0 blur-2xl bg-black/5 -bottom-4 -right-4 rounded-xl"></div>
-                        
                         <div 
                           className="paper-texture relative aspect-[3/4] rounded-xl flex flex-col items-center justify-center p-8 border border-white/50 cursor-pointer"
                           onClick={onOpen}
                         >
                             <div className="absolute inset-4 border border-[#d9c5c7]/30 rounded-lg pointer-events-none"></div>
-                            
                             <div className="mb-8 opacity-60">
                                 <ExactFloralEmblem className="w-12 h-12 text-[#d9c5c7]" />
                             </div>
-                            
                             <p className="font-sans text-[10px] tracking-[0.4em] uppercase text-[#8a7373] mb-6 font-bold">You're Invited To</p>
-                            
                             <div className="flex flex-col items-center mb-12">
                                 <span className="font-serif italic text-3xl text-[#452b2b]">The Wedding of</span>
                                 <div className="h-px w-8 bg-[#d9c5c7] my-4 opacity-50"></div>
@@ -311,7 +303,6 @@
                                     <span className="font-script text-4xl text-[#452b2b]">Aurelius</span>
                                 </div>
                             </div>
-
                             <div className="relative flex flex-col items-center group/seal">
                                 <div className="wax-seal w-20 h-20 rounded-full flex items-center justify-center relative z-10">
                                     <div className="w-14 h-14 rounded-full border border-white/20 flex items-center justify-center bg-[#e6baba]/20">
@@ -330,7 +321,7 @@
         };
 
         const Home = ({ onNavigate }) => (
-            <div className="flex flex-col items-center animate-fade-in">
+            <div className="flex flex-col items-center animate-fade-in w-full">
                 <div className="mb-10 md:mb-14 px-6 flex flex-col items-center mt-2 md:mt-4 text-center w-full relative z-30">
                     <Icon name="Flower" size={24} className="text-[#d9c5c7] mb-4" strokeWidth={1} />
                     <p className="text-[10px] md:text-[11px] tracking-[0.55em] text-[#8a7373] mb-6 uppercase font-semibold opacity-80">The Wedding Of</p>
@@ -356,13 +347,13 @@
                     </div>
                 </div>
                 
-                <div className="edge-to-edge-container mb-16 md:mb-20 -mt-48 md:-mt-80 lg:-mt-96 relative z-10">
+                <div className="full-window-image-container mb-16 md:mb-20 -mt-48 md:-mt-80 lg:-mt-96 relative z-10">
                     <img src="inviteartworkcropped.jpg" alt="Cherry Blossoms" className="grayscale-[15%] contrast-[1.05] opacity-90 md:opacity-100" />
                 </div>
 
                 <div className="w-full max-w-4xl mx-auto px-6 mb-16 md:mb-20 text-center">
                     <div className="flex justify-center mb-8">
-                        <ExactFloralEmblem className="w-14 h-14 text-[#d9c5c7]" />
+                        <span className="text-[#d9c5c7] text-2xl">✿</span>
                     </div>
                     <h2 className="font-serif italic text-2xl md:text-4xl text-[#452b2b] mb-6 tracking-tight opacity-90">Wedding Invitation</h2>
                     <div className="font-serif text-[#8a7373] text-base md:text-lg mb-12 max-w-lg mx-auto leading-relaxed italic">
@@ -401,14 +392,14 @@
                                         <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">True Jesus Church, Pacifica, CA</p>
                                     </div>
                                     <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                        <div className="w-2 h-2 rounded-full bg-[#e6baba]"></div>
                                     </div>
                                     <div className="w-1/2"></div>
                                 </div>
                                 <div className="relative flex flex-row items-center">
                                     <div className="w-1/2"></div>
                                     <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                        <div className="w-2 h-2 rounded-full bg-[#e6baba]"></div>
                                     </div>
                                     <div className="w-1/2 pl-6 md:pl-12 text-left">
                                         <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">2:00 PM</p>
@@ -419,7 +410,7 @@
                             </div>
                             <div className="flex justify-center py-4">
                                 <div className="bg-[#fdf7f7] px-4">
-                                    <Icon name="Flower2" size={20} className="text-[#d9c5c7]" strokeWidth={1} />
+                                    <span className="text-[#d9c5c7] text-lg">❀</span>
                                 </div>
                             </div>
                             <div className="space-y-12">
@@ -430,16 +421,17 @@
                                         <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
                                     </div>
                                     <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                        <div className="w-2 h-2 rounded-full bg-[#e6baba]"></div>
                                     </div>
                                     <div className="w-1/2"></div>
                                 </div>
                                 <div className="relative flex flex-row items-center">
                                     <div className="w-1/2"></div>
                                     <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#fdf7f7] border border-[#d9c5c7]">
-                                        <CherryBlossomSVG className="w-4 h-4 text-[#e6baba]" />
+                                        <div className="w-2 h-2 rounded-full bg-[#e6baba]"></div>
                                     </div>
                                     <div className="w-1/2 pl-6 md:pl-12 text-left">
+                                        {/* Dinner time changed to 6:00 PM */}
                                         <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1"> 6:00 PM</p>
                                         <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Dinner Starts</h3>
                                         <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
@@ -454,12 +446,12 @@
                     <div className="bg-white/40 border border-[#d9c5c7]/40 p-8 md:p-14 rounded-3xl backdrop-blur-sm text-center shadow-sm">
                         <div className="mb-8 inline-flex items-center justify-center">
                             <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
-                            <Icon name="Sparkles" className="mx-4 text-[#d9c5c7]" size={20} />
+                            <span className="mx-4 text-[#d9c5c7] text-xl">✧</span>
                             <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
                         </div>
                         <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b] mb-6 tracking-tight leading-snug uppercase">RSVP</h2>
                         <p className="font-serif text-[#8a7373] text-base md:text-lg mb-10 max-w-sm mx-auto italic">Kindly let us know your plans by <span className="text-[#452b2b] font-semibold not-italic block mt-1 tracking-wider uppercase text-sm">April 30, 2026</span></p>
-                        <button onClick={() => onNavigate('RSVP')} className="group relative w-full md:w-auto px-14 py-5 bg-transparent text-[#452b2b] font-bold tracking-[0.35em] uppercase hover:bg-[#452b2b] hover:text-white border border-[#452b2b] transition-all duration-500 rounded-full overflow-hidden text-[11px] md:text-xs shadow-sm hover:shadow-lg hover:shadow-[#452b2b]/10">
+                        <button onClick={() => onNavigate('RSVP')} className="group relative w-full md:w-auto px-14 py-5 bg-transparent text-[#452b2b] font-bold tracking-[0.35em] uppercase hover:bg-[#452b2b] hover:text-white border border-[#452b2b] transition-all duration-500 rounded-full overflow-hidden text-[11px] md:text-xs shadow-sm">
                             <span className="relative z-10">RSVP HERE</span>
                         </button>
                     </div>
@@ -468,15 +460,15 @@
         );
 
         const RSVP = () => (
-            <div className="max-w-3xl mx-auto animate-fade-in pt-4 pb-16 px-6 text-center">
+            <div className="w-full mx-auto animate-fade-in pt-4 pb-16 px-4 md:px-6 text-center">
                 <div className="mb-6 flex justify-center"><ExactFloralEmblem className="w-16 h-16 text-[#d9c5c7]" /></div>
                 <p className="text-[10px] tracking-[0.4em] text-[#8a7373] mb-3 uppercase font-bold">Kindly Reply</p>
                 <h2 className="font-serif italic text-4xl md:text-6xl text-[#452b2b] mb-8">RSVP</h2>
-                <div className="max-w-lg mx-auto bg-white/40 p-10 md:p-14 rounded-[2.5rem] border border-[#d9c5c7]/30 shadow-sm backdrop-blur-md">
-                    <p className="font-serif text-[#8a7373] text-lg md:text-xl leading-relaxed italic mb-8">We are excited to share the joy with you!<br />Please click the button below to let us know if you will be attending.</p>
-                    <div className="thin-hr mb-8 opacity-40"></div>
-                    <p className="text-[11px] font-bold tracking-[0.25em] text-[#452b2b] uppercase mb-10">Deadline: April 30, 2026</p>
-                    <a href="https://withjoy.com/hannah-aurelius/rsvp" target="_blank" rel="noopener noreferrer" className="inline-block w-full py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.4em] uppercase rounded-full hover:bg-[#5a3b3b] hover:shadow-xl hover:shadow-[#452b2b]/20 transition-all duration-500 transform hover:-translate-y-1 text-xs">RSVP HERE</a>
+                <div className="max-w-lg mx-auto bg-white/40 p-6 md:p-14 rounded-[2rem] border border-[#d9c5c7]/30 shadow-sm backdrop-blur-md">
+                    <p className="font-serif text-[#8a7373] text-base md:text-xl leading-relaxed italic mb-8 px-2">We are excited to share the joy with you!<br className="hidden md:block" /> Please click the button below to let us know if you will be attending.</p>
+                    <div className="thin-hr mb-8 opacity-40 mx-auto w-3/4"></div>
+                    <p className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-[#452b2b] uppercase mb-10">Deadline: April 30, 2026</p>
+                    <a href="https://withjoy.com/hannah-aurelius/rsvp" target="_blank" rel="noopener noreferrer" className="inline-block w-full max-w-[280px] md:max-w-none py-5 bg-[#452b2b] text-[#fdf7f7] font-bold tracking-[0.3em] uppercase rounded-full hover:bg-[#5a3b3b] transition-all duration-500 transform hover:-translate-y-1 text-[10px] md:text-xs">RSVP HERE</a>
                 </div>
             </div>
         );
@@ -491,7 +483,7 @@
                         { 
                             date: "March 2024", 
                             title: "How We Met", 
-                            text: "We owe our introduction to our younger brothers! Aurelius' brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common. ◡̈", 
+                            text: "We owe our introduction to our younger brothers! Aurelius's brother invited Hannah's brother over to play with their cats, and we ended up meeting for the very first time. We hit it off immediately and were surprised to find so much in common ◡̈", 
                             icon: "Heart",
                             image: "seabrighterbrighter.png"
                         },
@@ -578,7 +570,7 @@
                         { q: "Can I bring a plus-one?", a: "All are welcome to join us for our church ceremony! However, our reception will be reserved for close friends and family by invitation only. We thank you for your understanding!" },
                         { q: "Is there parking available?", a: "Yes! Complimentary parking is available on-site, but spots at the venue are quite limited. We kindly ask that you carpool with other guests as much as possible to ensure everyone has a place to park." }
                     ].map((item, i) => (
-                        <div key={i} className="bg-white/60 p-8 rounded-2xl border border-[#eee0e0] group hover:border-[#d9c5c7] transition-all duration-300">
+                        <div key={i} className="bg-white/60 p-8 rounded-2xl border border-[#eee0e0] group transition-all duration-300">
                             <h3 className="font-sans font-bold text-[#452b2b] mb-4 uppercase tracking-widest text-[10px] md:text-xs">{item.q}</h3>
                             <div className="font-serif text-[#8a7373] italic leading-relaxed text-base md:text-lg whitespace-pre-line">
                                 {item.a}
@@ -594,12 +586,11 @@
                 <h2 className="font-serif text-2xl md:text-3xl text-[#452b2b] mb-4 italic">Wedding Registry</h2>
                 <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.</p>
                 <div className="max-w-sm mx-auto">
-                    <a href="https://withjoy.com/hannah-aurelius/registry" target="_blank" rel="noopener noreferrer" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:border-[#d9c5c7] hover:shadow-lg transition-all duration-300">
+                    <a href="https://withjoy.com/hannah-aurelius/registry" target="_blank" rel="noopener noreferrer" className="block p-10 bg-white rounded-2xl border border-[#eee0e0] hover:shadow-lg transition-all duration-300">
                         <Icon name="Gift" size={32} className="text-[#e6baba] mx-auto mb-6" strokeWidth={1} />
                         <h3 className="font-sans font-bold text-base text-[#452b2b] uppercase tracking-widest">Link to Registry</h3>
                     </a>
-                    {/* Increased bottom note spacing with mt-12 */}
-                    <p className="mt-12 font-serif text-[#8a7373] text-xs md:text-sm italic leading-relaxed px-4">
+                    <p className="mt-20 font-serif text-[#8a7373] text-xs md:text-sm italic leading-relaxed px-4">
                         We’ve set up a digital fund above, but please feel free to use whichever method you’re most comfortable with, including cash or checks.
                     </p>
                 </div>
@@ -611,10 +602,67 @@
             const [activeTab, setActiveTab] = useState('Home');
             const [isMenuOpen, setIsMenuOpen] = useState(false);
             const [scrolled, setScrolled] = useState(false);
-            const [isPlaying, setIsPlaying] = useState(false);
             const audioRef = useRef(null);
 
             const navLinks = ['Home', 'RSVP', 'Our Story', 'Q&A', 'Registry'];
+
+            useEffect(() => {
+                const audio = new Audio('starlight.mp3');
+                audio.loop = true;
+                audio.volume = 0.4;
+                audioRef.current = audio;
+
+                const musicBtn = document.getElementById('music-btn');
+                const bars = [
+                    document.getElementById('bar-1'),
+                    document.getElementById('bar-2'),
+                    document.getElementById('bar-3')
+                ];
+
+                const updateUI = (playing) => {
+                    bars.forEach((bar, idx) => {
+                        if (playing) {
+                            bar.classList.add(`audio-anim-${idx + 1}`);
+                            bar.classList.remove('h-[2px]', 'self-center');
+                        } else {
+                            bar.classList.remove('audio-anim-1', 'audio-anim-2', 'audio-anim-3');
+                            bar.classList.add('h-[2px]', 'self-center');
+                        }
+                    });
+                };
+
+                const handleToggle = () => {
+                    if (audio.paused) {
+                        audio.play().then(() => updateUI(true)).catch(console.error);
+                    } else {
+                        audio.pause();
+                        updateUI(false);
+                    }
+                };
+
+                if (musicBtn) musicBtn.addEventListener('click', handleToggle);
+                
+                return () => {
+                    if (musicBtn) musicBtn.removeEventListener('click', handleToggle);
+                    audio.pause();
+                };
+            }, []);
+
+            useEffect(() => {
+                if (isOpened) {
+                    document.body.classList.remove('is-locked');
+                    document.body.classList.add('is-unlocked');
+                    document.documentElement.style.overflowY = 'visible';
+                    document.body.style.overflowY = 'visible';
+                    const musicToggle = document.getElementById('persistent-music-toggle');
+                    if (musicToggle) musicToggle.style.display = 'block';
+                } else {
+                    document.body.classList.add('is-locked');
+                    document.body.classList.remove('is-unlocked');
+                    document.documentElement.style.overflowY = 'hidden';
+                    document.body.style.overflowY = 'hidden';
+                }
+            }, [isOpened]);
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 100);
@@ -622,55 +670,27 @@
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
-            useEffect(() => {
-                const audio = new Audio('starlight.mp3');
-                audio.loop = true;
-                audio.volume = 0.4;
-                audioRef.current = audio;
-                
-                return () => {
-                    if (audioRef.current) {
-                        audioRef.current.pause();
-                        audioRef.current = null;
-                    }
-                };
-            }, []);
-
             const handleNavigate = (tab) => {
-                forceReleaseScroll();
                 setActiveTab(tab);
                 setIsMenuOpen(false);
                 window.scrollTo({ top: 0, behavior: 'auto' });
             };
 
-            const toggleMusic = (e) => {
-                if (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-                if (!audioRef.current) return;
-                
-                if (isPlaying) {
-                    audioRef.current.pause();
-                    setIsPlaying(false);
-                } else {
-                    audioRef.current.play().catch(console.error);
-                    setIsPlaying(true);
-                }
-            };
-
             const handleOpen = () => {
-                forceReleaseScroll();
                 setIsOpened(true);
                 if (audioRef.current) {
                     audioRef.current.play()
-                        .then(() => setIsPlaying(true))
+                        .then(() => {
+                            [1,2,3].forEach(i => {
+                                const bar = document.getElementById(`bar-${i}`);
+                                if (bar) {
+                                    bar.classList.add(`audio-anim-${i}`);
+                                    bar.classList.remove('h-[2px]', 'self-center');
+                                }
+                            });
+                        })
                         .catch(() => console.warn("Autoplay blocked."));
                 }
-                setTimeout(() => {
-                    forceReleaseScroll();
-                    window.scrollTo(0, 0);
-                }, 10);
             };
 
             return (
@@ -678,97 +698,82 @@
                     {!isOpened ? (
                         <EntryScreen onOpen={handleOpen} />
                     ) : (
-                        <React.Fragment>
-                            {/* MINI MUSIC TOGGLE */}
-                            <div className="fixed bottom-6 left-6 z-[9999] pointer-events-auto">
-                                <button 
-                                    onClick={toggleMusic}
-                                    className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-md border border-[#d9c5c7]/50 flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition-all duration-300 cursor-pointer"
-                                    aria-label="Toggle Music"
-                                >
-                                    <div className="flex items-center gap-[2px] h-3">
-                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-1' : 'h-[2px] self-center'}`}></div>
-                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-2' : 'h-[2px] self-center'}`}></div>
-                                        <div className={`w-[1.5px] bg-[#452b2b] rounded-full transition-all duration-300 ${isPlaying ? 'audio-anim-3' : 'h-[2px] self-center'}`}></div>
+                        <div className="animate-fade-in relative z-10 w-full">
+                            <FallingBlossoms />
+                            <ScatteredBlossoms />
+                            
+                            <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl border-b border-[#f0e6e6]' : 'bg-transparent'}`}>
+                                <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+                                    <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
+                                        <div className="flex flex-col gap-1 w-6 items-end">
+                                            <div className="h-[1.5px] w-full bg-[#452b2b] transition-all"></div>
+                                            <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full"></div>
+                                        </div>
+                                        <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block">Menu</span>
+                                    </button>
+                                    <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
+                                    <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 py-2 border border-[#452b2b] rounded-full hidden md:flex items-center justify-center min-w-[110px]">
+                                        <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
+                                        <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
+                                    </button>
+                                    <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
+                                </div>
+                            </header>
+
+                            <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                                <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
+                                <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
+                                    <div className="flex justify-end items-center mb-24">
+                                        <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
                                     </div>
-                                </button>
+                                    <nav className="flex flex-col gap-10">
+                                        {navLinks.map((link) => (
+                                            <button key={link} onClick={() => handleNavigate(link)} className="group text-left">
+                                                <div className="flex items-baseline gap-4">
+                                                    <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
+                                                    <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </nav>
+                                </div>
                             </div>
 
-                            <div className="animate-fade-in relative z-10">
-                                <FallingBlossoms />
-                                <ScatteredBlossoms />
-                                
-                                <header className={`fixed top-0 left-0 right-0 h-20 z-[100] px-6 md:px-12 flex items-center transition-all duration-700 ${scrolled ? 'bg-[#fdf7f7]/95 backdrop-blur-xl translate-y-0 border-b border-[#f0e6e6]' : 'bg-transparent -translate-y-2'}`}>
-                                    <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
-                                        <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-3 group outline-none">
-                                            <div className="flex flex-col gap-1 w-6 items-end">
-                                                <div className="h-[1.5px] w-full bg-[#452b2b] transition-all group-hover:bg-[#d9c5c7]"></div>
-                                                <div className="h-[1.5px] w-4 bg-[#452b2b] transition-all group-hover:w-full group-hover:bg-[#d9c5c7]"></div>
-                                            </div>
-                                            <span className="text-[10px] font-black tracking-[0.3em] uppercase text-[#452b2b] hidden md:block group-hover:text-[#d9c5c7] transition-colors">Menu</span>
-                                        </button>
-                                        <button onClick={() => handleNavigate('Home')} className="flex items-center justify-center group outline-none"><ScriptLogo /></button>
-                                        <button onClick={() => handleNavigate('RSVP')} className="relative overflow-hidden group px-8 pt-[9px] pb-[11px] border border-[#452b2b] rounded-full hidden md:flex items-center justify-center h-10 min-w-[110px]">
-                                            <span className="relative z-10 text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase group-hover:text-white transition-colors duration-500">RSVP</span>
-                                            <div className="absolute inset-0 bg-[#452b2b] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></div>
-                                        </button>
-                                        <button onClick={() => handleNavigate('RSVP')} className="md:hidden text-[10px] font-black tracking-[0.3em] text-[#452b2b] uppercase border-b-2 border-[#d9c5c7]">RSVP</button>
-                                    </div>
-                                </header>
-
-                                <div className={`fixed inset-0 z-[110] transition-transform duration-700 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                                    <div className="absolute inset-0 bg-[#452b2b]/20 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
-                                    <div className="absolute top-0 left-0 bottom-0 w-full md:w-[450px] bg-[#fdf7f7] p-12 flex flex-col border-r border-[#f0e6e6] shadow-2xl">
-                                        <div className="flex justify-end items-center mb-24">
-                                            <button onClick={() => setIsMenuOpen(false)} className="text-[#8a7373] hover:rotate-90 transition-transform"><Icon name="X" size={32} strokeWidth={1} /></button>
-                                        </div>
-                                        <nav className="flex flex-col gap-10">
-                                            {navLinks.map((link) => (
-                                                <button key={link} onClick={() => handleNavigate(link)} className="group text-left">
-                                                    <div className="flex items-baseline gap-4">
-                                                        <span className="text-[10px] font-black text-[#d9c5c7] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">0{navLinks.indexOf(link) + 1}</span>
-                                                        <span className={`font-serif text-5xl transition-all duration-500 ${activeTab === link ? 'text-[#452b2b] italic' : 'text-[#8a7373] hover:text-[#452b2b] hover:pl-4'}`}>{link}</span>
-                                                    </div>
+                            <div className="h-20" />
+                            <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
+                                <div className="max-w-4xl mx-auto flex justify-center">
+                                    <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm">
+                                        {navLinks.map((link) => (
+                                            <li key={link} className="relative rounded-full">
+                                                <button 
+                                                    onClick={() => handleNavigate(link)} 
+                                                    className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
+                                                >
+                                                    {link}
                                                 </button>
-                                            ))}
-                                        </nav>
-                                    </div>
+                                                {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
+                            </nav>
 
-                                <div className="h-16" />
-                                <nav className="pt-8 pb-8 px-4 sticky top-0 bg-[#fdf7f7]/95 backdrop-blur-sm z-50 border-b border-[#f0e6e6]/50">
-                                    <div className="max-w-4xl mx-auto flex justify-center">
-                                        <ul className="inline-flex items-center justify-center p-1 px-1.5 bg-white/40 rounded-full border border-[#d9c5c7]/30 shadow-sm overflow-hidden">
-                                            {navLinks.map((link) => (
-                                                <li key={link} className="relative rounded-full">
-                                                    <button 
-                                                        onClick={() => handleNavigate(link)} 
-                                                        className={`relative z-10 px-3 md:px-7 py-2 text-[9px] md:text-[10px] font-bold tracking-[0.2em] md:tracking-[0.25em] uppercase transition-all duration-300 rounded-full min-w-[58px] md:min-w-0 ${activeTab === link ? 'text-[#fdf7f7]' : 'text-[#8a7373] hover:text-[#452b2b]'}`}
-                                                    >
-                                                        {link}
-                                                    </button>
-                                                    {activeTab === link && <div className="absolute inset-0 bg-[#452b2b] rounded-full z-0" />}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </nav>
-
-                                <main className="max-w-5xl mx-auto pt-4 md:pt-8 relative z-10 px-6">
-                                    {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
+                            <main className="max-w-full mx-auto pt-4 md:pt-8 px-0">
+                                {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
+                                <div className="max-w-5xl mx-auto px-4 sm:px-6">
                                     {activeTab === 'RSVP' && <RSVP />}
                                     {activeTab === 'Our Story' && <OurStory />}
                                     {activeTab === 'Q&A' && <QA />}
                                     {activeTab === 'Registry' && <Registry />}
-                                </main>
+                                </div>
+                            </main>
 
-                                <footer className="mt-40 text-center pb-20 relative z-10">
-                                    <ExactFloralEmblem className="w-16 h-16 opacity-60 mx-auto mb-6 text-[#d9c5c7]" />
-                                    <ScriptLogo className="mx-auto scale-125" />
-                                    <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
-                                </footer>
-                            </div>
-                        </React.Fragment>
+                            <footer className="mt-40 text-center pb-20">
+                                <span className="text-[#d9c5c7] text-4xl block mb-6">✿</span>
+                                <ScriptLogo className="mx-auto scale-125" />
+                                <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
+                            </footer>
+                        </div>
                     )}
                 </div>
             );
