@@ -74,6 +74,7 @@
             width: 100%;
             background-color: #fdf7f7;
             color: #452b2b;
+            overflow-x: hidden; /* Added to prevent horizontal scroll */
         }
 
         body.is-locked {
@@ -84,7 +85,7 @@
         }
 
         body.is-unlocked {
-            overflow-y: visible !important;
+            overflow-y: auto !important;
             overflow-x: hidden !important;
             height: auto !important;
             position: relative !important;
@@ -151,7 +152,6 @@
     <div id="root"></div>
 
     <div id="persistent-music-toggle">
-        <!-- Made music button smaller: w-8 h-8 -->
         <button id="music-btn" class="w-8 h-8 rounded-full bg-white/95 backdrop-blur-md border border-[#d9c5c7]/60 flex items-center justify-center shadow-[0_8px_30px_rgb(0,0,0,0.15)] hover:bg-white hover:scale-110 active:scale-95 transition-all duration-300">
             <div class="flex items-center gap-[2px] h-2">
                 <div id="bar-1" class="w-[1.5px] bg-[#452b2b] rounded-full h-[2px] self-center"></div>
@@ -230,7 +230,7 @@
                     const delay = i < 6 ? 0 : Math.random() * 12; 
                     return {
                         id: i,
-                        left: `${Math.random() * 100}%`,
+                        left: `${Math.random() * 95}%`, // Slightly inward from edge
                         delay: `${delay}s`,
                         duration: `${duration}s`,
                         size: 10 + Math.random() * 14,
@@ -241,7 +241,7 @@
             }, []);
 
             return (
-                <div className="fixed inset-0 pointer-events-none z-[80] overflow-hidden">
+                <div className="fixed inset-0 pointer-events-none z-[80] overflow-hidden w-full max-w-full">
                     {blossoms.map((b) => (
                         <div
                             key={b.id}
@@ -273,13 +273,13 @@
                 { top: '8%', left: '5%', rot: 45, scale: 1, type: 'flower', opacity: 0.6 },
                 { top: '15%', left: '85%', rot: -15, scale: 0.8, type: 'petal', opacity: 0.8 },
                 { top: '35%', left: '8%', rot: 75, scale: 0.6, type: 'petal', opacity: 0.5 },
-                { top: '45%', left: '92%', rot: 20, scale: 1.2, type: 'flower', opacity: 0.4 },
+                { top: '45%', left: '88%', rot: 20, scale: 1.2, type: 'flower', opacity: 0.4 },
                 { top: '65%', left: '12%', rot: -45, scale: 0.9, type: 'petal', opacity: 0.7 },
-                { top: '80%', left: '88%', rot: -30, scale: 0.8, type: 'flower', opacity: 0.5 },
+                { top: '80%', left: '85%', rot: -30, scale: 0.8, type: 'flower', opacity: 0.5 },
                 { top: '95%', left: '50%', rot: 15, scale: 1.1, type: 'flower', opacity: 0.3 },
             ];
             return (
-                <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden min-h-full">
+                <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden min-h-full w-full">
                     {items.map((item, i) => (
                         <div key={i} className="absolute text-[#e6baba]" style={{ top: item.top, left: item.left, transform: `rotate(${item.rot}deg) scale(${item.scale})`, opacity: item.opacity }}>
                             {item.type === 'flower' ? <CherryBlossomSVG className="w-12 h-12 -mt-6 -ml-6" /> : <SinglePetalSVG className="w-6 h-6" />}
@@ -291,7 +291,7 @@
 
         const EntryScreen = ({ onOpen }) => {
             return (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#fdf7f7] px-6 overflow-hidden">
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#fdf7f7] px-6 overflow-hidden w-full">
                     <div className="relative group max-w-sm w-full animate-fade-in">
                         <div className="absolute inset-0 blur-2xl bg-black/5 -bottom-4 -right-4 rounded-xl"></div>
                         <div 
@@ -330,7 +330,7 @@
         };
 
         const Home = ({ onNavigate }) => (
-            <div className="flex flex-col items-center animate-fade-in w-full">
+            <div className="flex flex-col items-center animate-fade-in w-full overflow-hidden">
                 <div className="mb-10 md:mb-14 px-6 flex flex-col items-center mt-2 md:mt-4 text-center w-full relative z-30">
                     <Icon name="Flower" size={24} className="text-[#d9c5c7] mb-4" strokeWidth={1} />
                     <p className="text-[10px] md:text-[11px] tracking-[0.55em] text-[#8a7373] mb-6 uppercase font-semibold opacity-80">The Wedding Of</p>
@@ -360,7 +360,7 @@
                     <img src="inviteartworkcropped.jpg" alt="Cherry Blossoms" className="grayscale-[15%] contrast-[1.05] opacity-90 md:opacity-100" />
                 </div>
 
-                <div className="w-full max-w-4xl mx-auto px-6 mb-16 md:mb-20 text-center">
+                <div className="w-full max-w-4xl mx-auto px-6 mb-16 md:mb-20 text-center overflow-hidden">
                     <div className="flex justify-center mb-8">
                         <span className="text-[#d9c5c7] text-2xl">✿</span>
                     </div>
@@ -371,7 +371,7 @@
                         <p>We formally invite you to our wedding!</p>
                     </div>
                     <div className="thin-hr mb-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
-                    <div className="flex flex-row items-center justify-center max-w-2xl mx-auto">
+                    <div className="flex flex-row items-center justify-center max-w-2xl mx-auto w-full">
                         <div className="flex-1 text-center px-2">
                             <p className="text-[9px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] text-[#8a7373] uppercase mb-2 font-bold">When</p>
                             <p className="font-serif text-sm md:text-xl text-[#452b2b] tracking-wide font-medium">Sunday, June 28th</p>
@@ -385,7 +385,7 @@
                     <div className="thin-hr mt-10 max-w-2xl mx-auto h-[1.5px] opacity-100"></div>
                 </div>
 
-                <div className="w-full max-w-4xl mx-auto px-6 mb-24 md:mb-32">
+                <div className="w-full max-w-4xl mx-auto px-6 mb-24 md:mb-32 overflow-hidden">
                     <div className="text-center mb-16">
                         <p className="text-xs tracking-[0.4em] text-[#8a7373] mb-4 uppercase font-bold opacity-80">The Schedule</p>
                         <h2 className="font-serif italic text-3xl md:text-4xl text-[#452b2b]">Wedding Timeline</h2>
@@ -440,8 +440,7 @@
                                         <div className="w-2 h-2 rounded-full bg-[#e6baba]"></div>
                                     </div>
                                     <div className="w-1/2 pl-6 md:pl-12 text-left">
-                                        {/* Dinner time changed to 6:00 PM */}
-                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1"> 6:00 PM</p>
+                                        <p className="font-sans text-[11px] font-bold tracking-[0.2em] text-[#8a7373] uppercase mb-1">6:00 PM</p>
                                         <h3 className="font-serif text-lg md:text-xl text-[#452b2b] mb-1">Dinner Starts</h3>
                                         <p className="font-serif text-[#8a7373] italic text-xs md:text-sm">Hakone Gardens, Saratoga, CA</p>
                                     </div>
@@ -451,7 +450,7 @@
                     </div>
                 </div>
 
-                <div className="w-full max-w-2xl mx-auto px-6 mb-32 relative">
+                <div className="w-full max-w-2xl mx-auto px-6 mb-32 relative overflow-hidden">
                     <div className="bg-white/40 border border-[#d9c5c7]/40 p-8 md:p-14 rounded-3xl backdrop-blur-sm text-center shadow-sm">
                         <div className="mb-8 inline-flex items-center justify-center">
                             <div className="h-[1px] w-8 bg-[#d9c5c7]"></div>
@@ -469,7 +468,7 @@
         );
 
         const RSVP = () => (
-            <div className="w-full mx-auto animate-fade-in pt-4 pb-16 px-4 md:px-6 text-center">
+            <div className="w-full mx-auto animate-fade-in pt-4 pb-16 px-4 md:px-6 text-center overflow-hidden">
                 <div className="mb-6 flex justify-center"><ExactFloralEmblem className="w-16 h-16 text-[#d9c5c7]" /></div>
                 <p className="text-[10px] tracking-[0.4em] text-[#8a7373] mb-3 uppercase font-bold">Kindly Reply</p>
                 <h2 className="font-serif italic text-4xl md:text-6xl text-[#452b2b] mb-8">RSVP</h2>
@@ -522,7 +521,7 @@
                             title: "Southern California Winter", 
                             text: "Hannah traveled to Southern California to serve as a counselor for the Winter SSC church event, where she officially met the rest of the family afterward!", 
                             icon: "Users",
-                            image: "disney.png"
+                            image: "cablecar.png"
                         },
                         { 
                             date: "May 2025", 
@@ -567,7 +566,7 @@
         );
 
         const QA = () => (
-            <div className="max-w-2xl mx-auto animate-fade-in pb-20 px-4 text-center">
+            <div className="max-w-2xl mx-auto animate-fade-in pb-20 px-4 text-center overflow-hidden">
                 <div className="text-center mb-16">
                     <p className="text-xs tracking-[0.3em] text-[#8a7373] mb-4 uppercase font-bold">Frequently Asked</p>
                     <h2 className="font-serif italic text-4xl md:text-5xl text-[#452b2b] mb-12 italic">Q & A</h2>
@@ -591,7 +590,7 @@
         );
 
         const Registry = () => (
-            <div className="max-w-3xl mx-auto animate-fade-in text-center pb-20 px-4 mt-6 md:mt-10">
+            <div className="max-w-3xl mx-auto animate-fade-in text-center pb-20 px-4 mt-6 md:mt-10 overflow-hidden">
                 <h2 className="font-serif text-2xl md:text-3xl text-[#452b2b] mb-4 italic">Wedding Registry</h2>
                 <p className="font-serif text-[#8a7373] text-sm md:text-base mb-12 max-w-lg mx-auto italic leading-relaxed">The most important thing to us is having you there to celebrate. If you wish to give a gift, a contribution toward our future home fund would be sincerely appreciated as we begin our new life together.</p>
                 <div className="max-w-sm mx-auto">
@@ -661,15 +660,13 @@
                 if (isOpened) {
                     document.body.classList.remove('is-locked');
                     document.body.classList.add('is-unlocked');
-                    document.documentElement.style.overflowY = 'visible';
-                    document.body.style.overflowY = 'visible';
+                    document.documentElement.style.overflowX = 'hidden';
+                    document.body.style.overflowX = 'hidden';
                     const musicToggle = document.getElementById('persistent-music-toggle');
                     if (musicToggle) musicToggle.style.display = 'block';
                 } else {
                     document.body.classList.add('is-locked');
                     document.body.classList.remove('is-unlocked');
-                    document.documentElement.style.overflowY = 'hidden';
-                    document.body.style.overflowY = 'hidden';
                 }
             }, [isOpened]);
 
@@ -703,11 +700,11 @@
             };
 
             return (
-                <div className="min-h-screen bg-[#fdf7f7] font-sans relative">
+                <div className="min-h-screen bg-[#fdf7f7] font-sans relative w-full overflow-x-hidden">
                     {!isOpened ? (
                         <EntryScreen onOpen={handleOpen} />
                     ) : (
-                        <div className="animate-fade-in relative z-10 w-full">
+                        <div className="animate-fade-in relative z-10 w-full overflow-x-hidden">
                             <FallingBlossoms />
                             <ScatteredBlossoms />
                             
@@ -767,7 +764,7 @@
                                 </div>
                             </nav>
 
-                            <main className="max-w-full mx-auto pt-4 md:pt-8 px-0">
+                            <main className="max-w-full mx-auto pt-4 md:pt-8 px-0 overflow-hidden">
                                 {activeTab === 'Home' && <Home onNavigate={handleNavigate} />}
                                 <div className="max-w-5xl mx-auto px-4 sm:px-6">
                                     {activeTab === 'RSVP' && <RSVP />}
@@ -777,7 +774,7 @@
                                 </div>
                             </main>
 
-                            <footer className="mt-40 text-center pb-20">
+                            <footer className="mt-40 text-center pb-20 w-full">
                                 <span className="text-[#d9c5c7] text-4xl block mb-6">✿</span>
                                 <ScriptLogo className="mx-auto scale-125" />
                                 <p className="font-serif text-base text-[#8a7373] italic tracking-[0.4em] mt-8 uppercase">06.28.2026</p>
